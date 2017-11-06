@@ -23,7 +23,7 @@ var Prism = function(opts){
   this.opts = new ObjectManage({
     username: '',
     password: '',
-    domain: 'cdn.oose.io',
+    domain: 'cdn.stretchfs.com',
     prism: {
       host: null,
       port: 8161
