@@ -75,6 +75,9 @@ describe('my test',function(){
 
 ## Changelog
 
+### 3.1.4
+* Add missing keygen file, broken from rename
+
 ### 3.1.3
 * urlPurchase will no longer append the purchase extension and will depend on
  the file name.
