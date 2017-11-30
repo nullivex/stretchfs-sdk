@@ -19,12 +19,12 @@ var NetworkError = require('../helpers/NetworkError')
 var pkg = require('../package.json')
 var purchase = require('./helpers/purchase')
 var sslOptions = {
-  keyFile: __dirname + '/../ssl/oose_test.key',
-  certFile: __dirname + '/../ssl/oose_test.crt',
-  pemFile: __dirname + '/../ssl/oose_test.pem',
-  key: fs.readFileSync(__dirname + '/../ssl/oose_test.key'),
-  cert: fs.readFileSync(__dirname + '/../ssl/oose_test.crt'),
-  pem: fs.readFileSync(__dirname + '/../ssl/oose_test.pem')
+  keyFile: __dirname + '/../ssl/stretchfs_test.key',
+  certFile: __dirname + '/../ssl/stretchfs_test.crt',
+  pemFile: __dirname + '/../ssl/stretchfs_test.pem',
+  key: fs.readFileSync(__dirname + '/../ssl/stretchfs_test.key'),
+  cert: fs.readFileSync(__dirname + '/../ssl/stretchfs_test.crt'),
+  pem: fs.readFileSync(__dirname + '/../ssl/stretchfs_test.pem')
 }
 var server = https.createServer(
   {
@@ -118,7 +118,7 @@ app.post('/content/upload',validateSession,function(req,res){
     data[key] = value
   })
   busboy.on('file',function(key,file,name,encoding,mimetype){
-    var tmpfile = temp.path({prefix: 'oose-mock-'})
+    var tmpfile = temp.path({prefix: 'stretchfs-mock-'})
     var sniff = sha1stream.createStream()
     var writeStream = fs.createWriteStream(tmpfile)
     files[key] = {
@@ -284,7 +284,7 @@ app.get('/job/content/download/:handle/:file',function(req,res){
 //main content retrieval route
 app.get('/:token/:filename',function(req,res){
   res.redirect(302,
-    'http://mock.oose.io/' + purchase.token + '/' + req.params.filename)
+    'http://mock.stretchfs.com/' + purchase.token + '/' + req.params.filename)
 })
 
 
@@ -331,7 +331,7 @@ exports.user = user
 
 
 /**
- * Start oose mock
+ * Start stretchfs mock
  * @param {number} port
  * @param {string} host
  * @return {P}
@@ -342,7 +342,7 @@ exports.start = function(port,host){
 
 
 /**
- * Stop oose prism
+ * Stop stretchfs prism
  * @return {P}
  */
 exports.stop = function(){

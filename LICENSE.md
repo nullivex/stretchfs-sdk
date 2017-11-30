@@ -1,6 +1,3 @@
-The MIT License (MIT)
-===
-
 ### Copyright (c) <2017> <NULLIVEX, LLC>
 
 ### GNU GENERAL PUBLIC LICENSE

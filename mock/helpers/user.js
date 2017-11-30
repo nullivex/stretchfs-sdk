@@ -12,7 +12,7 @@ module.exports = {
     token: '57Ra171l0LE6bd8K71fpfHKu12C4H6sN1dc3wx0vLlg1EX2Gg4322rQ8EUDS1MdK',
     ip: '127.0.0.1',
     data: {
-      userCtx: {name: 'oose'}
+      userCtx: {name: 'stretchfs'}
     }
   }
 }

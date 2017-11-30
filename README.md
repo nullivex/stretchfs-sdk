@@ -1,21 +1,21 @@
-oose-sdk [![Build Status](https://travis-ci.org/nullivex/oose-sdk.svg?branch=master)](https://travis-ci.org/nullivex/oose-sdk)
+stretchfs-sdk [![Build Status](https://travis-ci.org/nullivex/stretchfs-sdk.svg?branch=master)](https://travis-ci.org/nullivex/stretchfs-sdk)
 ========
 
-OOSE Software Development Kit
+StretchFS Software Development Kit
 
 ## API Usage
 
 ```
-$ npm install oose-sdk --save
+$ npm install stretchfs-sdk --save
 ```
 
 ```js
 'use strict';
-var oose = require('oose-sdk')
+var stretchfs = require('stretchfs-sdk')
 
-oose.api.updateConfig({
+stretchfs.api.updateConfig({
   prism: {
-    host: 'prism.oose.io',
+    host: 'prism.stretchfs.io',
     port: 5972
   }
 })
@@ -24,7 +24,7 @@ oose.api.updateConfig({
 var session = {}
 
 //setup our api and login
-var prism = oose.api.prism()
+var prism = stretchfs.api.prism()
 prism.postAsync({
   url: prism.url('/user/login'),
   json: {
@@ -38,7 +38,7 @@ prism.postAsync({
     session = body.session
   })
   .catch(prism.handleNetworkError)
-  .catch(oose.NetworkError,function(err){
+  .catch(stretchfs.NetworkError,function(err){
     console.log('A network error occurred: ' + err.message)
   })
 ```
@@ -47,9 +47,9 @@ prism.postAsync({
 
 ```js
 'use strict';
-var oose = require('oose-sdk')
+var stretchfs = require('stretchfs-sdk')
 
-oose.api.updateConfig({
+stretchfs.api.updateConfig({
   prism: {
     port: 3001,
     host: '127.0.0.1'
@@ -58,13 +58,13 @@ oose.api.updateConfig({
 
 describe('my test',function(){
   before(function(){
-    return oose.mock.start(3001,'127.0.0.1')
+    return stretchfs.mock.start(3001,'127.0.0.1')
   })
   after(function(){
-    return oose.mock.stop()
+    return stretchfs.mock.stop()
   })
   it('should be up',function(){
-    var prism = oose.api.prism()
+    var prism = stretchfs.api.prism()
     return prism.postAsync(prism.url('/ping'))
       .spread(function(res,body){
         expect(body.pong).to.equal('pong')
@@ -74,6 +74,12 @@ describe('my test',function(){
 ```
 
 ## Changelog
+
+### 3.1.3
+* urlPurchase will no longer append the purchase extension and will depend on
+ the file name.
+* urlStatic no longer takes the file extension just the file name with the
+ extension
 
 ### 3.1.2
 * Prism jobDetail no longer users api.validateResponse as jobDetail may
@@ -93,8 +99,8 @@ throw false errors just from reporting the job status
 * Update license file to match package.json of GPL3+
 
 ### 3.0.0
-* Updated to work with OOSE 3.0.0 which is switching to Couchbase
-* Implements Shredder into the OOSE system which has been renamed to Job
+* Updated to work with StretchFS 3.0.0 which is switching to Couchbase
+* Implements Shredder into the StretchFS system which has been renamed to Job
 
 ### 2.2.2
 * Upgrade dependencies
@@ -121,7 +127,7 @@ api.setupAccess('prism',config.prism) and api.setupAccess('store',config.store)
 
 ### 2.0.0
 * Update packages and dependencies
-* Drop API methods removed in OOSE 2.0.0
+* Drop API methods removed in StretchFS 2.0.0
  * `passwordReset`
 
 ### 1.4.1
@@ -131,7 +137,7 @@ api.setupAccess('prism',config.prism) and api.setupAccess('store',config.store)
 ### 1.4.0
 
 * Upgraded to run with node 4.x
-* Skipped version 1.3.x to match the main OOSE release of 1.4.0
+* Skipped version 1.3.x to match the main StretchFS release of 1.4.0
 * Upgraded all dependencies
 * Fixed bug that causes timeout `msecs not a number issue`
 

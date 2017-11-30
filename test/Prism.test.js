@@ -112,17 +112,17 @@ describe('Prism',function(){
       })
   })
   it('should output a purchase url',function(){
-    var url = prism.urlPurchase(mock.purchase)
+    var url = prism.urlPurchase(mock.purchase,mock.content.filename)
     expect(url).to.equal(
       '//' + prism.opts.domain + '/' +
-      mock.purchase.token + '/' + 'video.' + mock.purchase.ext
+      mock.purchase.token + '/' + mock.content.filename
     )
   })
   it('should output a static url',function(){
-    var url = prism.urlStatic(mock.content.hash,mock.content.ext)
+    var url = prism.urlStatic(mock.content.hash,mock.content.filename)
     expect(url).to.equal(
       '//' + prism.opts.domain + '/static/' +
-      mock.content.hash + '/file.' + mock.content.ext
+      mock.content.hash + '/' + mock.content.filename
     )
   })
   it('should connect with a session key',function(){

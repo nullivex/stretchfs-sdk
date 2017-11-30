@@ -1,6 +1,6 @@
 'use strict';
 var P = require('bluebird')
-var debug = require('debug')('oose-sdk:api')
+var debug = require('debug')('stretchfs-sdk:api')
 var ObjectManage = require('object-manage')
 var request = require('request')
 var util = require('util')

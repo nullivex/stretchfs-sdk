@@ -313,23 +313,21 @@ Prism.prototype.urlPurchase = function(purchase,name){
   var that = this
   name = name || 'video'
   return '//' + that.opts.domain + '/' +
-    purchase.token + '/' + name + '.' + purchase.ext
+    purchase.token + '/' + name
 }
 
 
 /**
  * Output a static URL
  * @param {string} hash
- * @param {string} ext
  * @param {string} name
  * @return {string}
  */
-Prism.prototype.urlStatic = function(hash,ext,name){
+Prism.prototype.urlStatic = function(hash,name){
   var that = this
   name = name || 'file'
-  ext = ext || 'bin'
   return '//' + that.opts.domain + '/static/' +
-    hash + '/' + name + '.' + ext
+    hash + '/' + name
 }
 
 

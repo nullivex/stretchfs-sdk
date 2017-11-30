@@ -327,7 +327,7 @@ exports.contentDeliver = function(prism,localAddress,referrer){
         var uri = url.parse(res.headers.location)
         var host = uri.host.split('.')
         expect(host[0]).to.match(/^mock/)
-        expect(host[1]).to.equal('oose')
+        expect(host[1]).to.equal('stretchfs')
         expect(uri.pathname).to.equal(
           '/' + exports.purchase.token + '/' + content.filename)
       })
