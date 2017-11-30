@@ -91,7 +91,7 @@ exports.checkPublic = function(prism){
       .spread(client.validateResponse())
       .spread(function(res,body){
         expect(body.message).to.equal(
-          'Welcome to OOSE Mock version ' + pkg.version)
+          'Welcome to StretchFS Mock version ' + pkg.version)
         return client.postAsync(client.url('/ping'))
       })
       .spread(client.validateResponse())

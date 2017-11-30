@@ -75,6 +75,9 @@ describe('my test',function(){
 
 ## Changelog
 
+### 3.1.5
+* Rename session token, fix other leftover issues.
+
 ### 3.1.4
 * Add missing keygen file, broken from rename
 

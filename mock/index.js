@@ -50,7 +50,7 @@ app.use(bodyParser.json())
 
 //home page
 app.post('/',function(req,res){
-  res.json({message: 'Welcome to OOSE Mock version ' + pkg.version})
+  res.json({message: 'Welcome to StretchFS Mock version ' + pkg.version})
 })
 
 //health test
@@ -62,7 +62,7 @@ app.post('/ping',function(req,res){
 //protected routes
 //--------------------
 var validateSession = function(req,res,next){
-  var token = req.get('X-OOSE-Token')
+  var token = req.get('X-StretchFS-Token')
   if(!token || user.session.token !== token){
     res.status(401)
     res.json({error: 'Invalid session'})

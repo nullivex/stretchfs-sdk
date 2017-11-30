@@ -53,7 +53,7 @@ var cache = {}
 
 var config = {
   maxSockets: Infinity,
-  sessionTokenName: 'X-OOSE-Token'
+  sessionTokenName: 'X-STRETCHFS-Token'
 }
 
 var pool = {maxSockets: config.maxSockets}
