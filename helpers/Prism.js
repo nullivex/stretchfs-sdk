@@ -26,7 +26,7 @@ var Prism = function(opts){
     domain: 'cdn.oose.io',
     prism: {
       host: null,
-      port: 5971
+      port: 8161
     }
   })
   this.opts.$load(opts)
@@ -84,7 +84,7 @@ Prism.prototype.connect = function(host,port){
       that.api = api.setupAccess('prism',that.opts.prism)
     } else {
       if(!that.opts.prism.host) that.opts.prism.host = that.opts.domain
-      if(!that.opts.prism.port) that.opts.prism.port = port || 5971
+      if(!that.opts.prism.port) that.opts.prism.port = port || 8161
       that.connected = true
       that.api = api.prism(that.opts.prism)
     }

@@ -17,7 +17,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
 var mockConfig = {
   prism: {
-    port: 5971,
+    port: 8161,
     host: '127.0.0.1'
   }
 }

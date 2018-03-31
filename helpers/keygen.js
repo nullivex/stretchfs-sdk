@@ -11,7 +11,7 @@ program
   .option('-u, --username <s>','Username for login')
   .option('-p, --password <s>','Password for login')
   .option('-H, --host <s>','Prism host, defaults to cdn.oose.io')
-  .option('-P, --port <n>','Prism port, defaults to 5971')
+  .option('-P, --port <n>','Prism port, defaults to 8161')
   .parse(process.argv)
 
 
@@ -19,7 +19,7 @@ program
 var prism = new Prism({
   prism: {
     host: program.host || null,
-    port: program.port || 5971
+    port: program.port || 8161
   }
 })
 

@@ -16,7 +16,7 @@ var stretchfs = require('stretchfs-sdk')
 stretchfs.api.updateConfig({
   prism: {
     host: 'prism.stretchfs.io',
-    port: 5972
+    port: 8161
   }
 })
 
@@ -74,6 +74,9 @@ describe('my test',function(){
 ```
 
 ## Changelog
+
+### 3.1.6
+* Update port layout to new format, 8160 - 8169
 
 ### 3.1.5
 * Rename session token, fix other leftover issues.

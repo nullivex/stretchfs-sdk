@@ -86,10 +86,10 @@ describe('api:NetworkError',function(){
 describe('api:validateResponse',function(){
   var client = api.setupAccess('prism',{
     host: '127.0.0.1',
-    port: 5978
+    port: 8168
   })
   before(function(){
-    return server.listenAsync(5978,'127.0.0.1')
+    return server.listenAsync(8168,'127.0.0.1')
   })
   after(function(){
     return server.closeAsync()
@@ -130,7 +130,7 @@ describe('api:validateResponse',function(){
       .catch(function(err){
         expect(err.message).to.equal(
           'Invalid response (401) to ' +
-          'https://127.0.0.1:5978/invalid-code/valid ' +
+          'https://127.0.0.1:8168/invalid-code/valid ' +
           'body: { success: \'valid\' }'
         )
       })
