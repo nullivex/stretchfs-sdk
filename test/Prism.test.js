@@ -23,7 +23,7 @@ var mockConfig = {
 }
 
 var mockServerConfig = {
-  port: 3001,
+  port: 8162,
   host: '127.0.0.1'
 }
 
