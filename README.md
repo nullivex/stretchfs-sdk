@@ -11,7 +11,7 @@ $ npm install stretchfs-sdk --save
 
 ```js
 'use strict';
-var stretchfs = require('stretchfs-sdk')
+let stretchfs = require('stretchfs-sdk')
 
 stretchfs.api.updateConfig({
   prism: {
@@ -21,10 +21,10 @@ stretchfs.api.updateConfig({
 })
 
 //store the user session
-var session = {}
+let session = {}
 
 //setup our api and login
-var prism = stretchfs.api.prism()
+let prism = stretchfs.api.prism()
 prism.postAsync({
   url: prism.url('/user/login'),
   json: {
@@ -47,7 +47,7 @@ prism.postAsync({
 
 ```js
 'use strict';
-var stretchfs = require('stretchfs-sdk')
+let stretchfs = require('stretchfs-sdk')
 
 stretchfs.api.updateConfig({
   prism: {
@@ -64,7 +64,7 @@ describe('my test',function(){
     return stretchfs.mock.stop()
   })
   it('should be up',function(){
-    var prism = stretchfs.api.prism()
+    let prism = stretchfs.api.prism()
     return prism.postAsync(prism.url('/ping'))
       .spread(function(res,body){
         expect(body.pong).to.equal('pong')
@@ -74,6 +74,11 @@ describe('my test',function(){
 ```
 
 ## Changelog
+
+### 4.0.0
+* Update depdendencies to work with latest StretchFS 4.0
+* Pin `promisepipe` @ 2.1.1 to preserve promise compatibility.
+* Implement ES6
 
 ### 3.1.6
 * Update port layout to new format, 8160 - 8169
