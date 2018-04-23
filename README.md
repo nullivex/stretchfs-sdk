@@ -75,6 +75,10 @@ describe('my test',function(){
 
 ## Changelog
 
+### 4.0.1
+* Content purchase now takes the IP argument that will lock the purchase
+to a requesting viewers IP.
+
 ### 4.0.0
 * Update depdendencies to work with latest StretchFS 4.0
 * Pin `promisepipe` @ 2.1.1 to preserve promise compatibility.
