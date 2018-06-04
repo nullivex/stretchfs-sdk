@@ -596,9 +596,85 @@ Prism.prototype.folderDelete = function(folderPath){
     .then(function(result){
       client = result
       return client.postAsync({
-        url: client.url('/file/folderDelete'),
+        url: client.url('/file/remove'),
         json: {
           path: folderPath
+        }
+      })
+    })
+    .spread(that.api.validateResponse())
+    .spread(function(res,body){
+      return body
+    })
+    .catch(that.handleNetworkError)
+}
+
+
+/**
+ * File import
+ * @param {string} folderPath
+ * @param {array} fileList
+ * @return {P}
+ */
+Prism.prototype.fileImport = function(folderPath,fileList){
+  var that = this
+  var client = {}
+  return that.prepare()
+    .then(function(result){
+      client = result
+      return client.postAsync({
+        url: client.url('/file/import'),
+        json: {
+          folderPath: folderPath,
+          urlText: (fileList || []).join('\n')
+        }
+      })
+    })
+    .spread(that.api.validateResponse())
+    .spread(function(res,body){
+      return body
+    })
+    .catch(that.handleNetworkError)
+}
+
+
+/**
+ * File import list
+ * @return {P}
+ */
+Prism.prototype.fileImportList = function(){
+  var that = this
+  var client = {}
+  return that.prepare()
+    .then(function(result){
+      client = result
+      return client.getAsync({
+        url: client.url('/file/importList')
+      })
+    })
+    .spread(that.api.validateResponse())
+    .spread(function(res,body){
+      return body
+    })
+    .catch(that.handleNetworkError)
+}
+
+
+/**
+ * File list
+ * @param {string} filePath
+ * @return {P}
+ */
+Prism.prototype.fileList = function(filePath){
+  var that = this
+  var client = {}
+  return that.prepare()
+    .then(function(result){
+      client = result
+      return client.getAsync({
+        url: client.url('/file/list'),
+        qs: {
+          path: filePath
         }
       })
     })
@@ -621,10 +697,62 @@ Prism.prototype.fileDetail = function(filePath){
   return that.prepare()
     .then(function(result){
       client = result
-      return client.postAsync({
+      return client.getAsync({
         url: client.url('/file/detail'),
-        json: {
+        qs: {
           path: filePath
+        }
+      })
+    })
+    .spread(that.api.validateResponse())
+    .spread(function(res,body){
+      return body
+    })
+    .catch(that.handleNetworkError)
+}
+
+
+/**
+ * File download
+ * @param {string} fileHandle
+ * @return {P}
+ */
+Prism.prototype.fileDownload = function(fileHandle){
+  var that = this
+  var client = {}
+  return that.prepare()
+    .then(function(result){
+      client = result
+      return client.getAsync({
+        url: client.url('/file/download'),
+        qs: {
+          handle: fileHandle
+        }
+      })
+    })
+    .spread(that.api.validateResponse())
+    .spread(function(res,body){
+      return body
+    })
+    .catch(that.handleNetworkError)
+}
+
+
+/**
+ * File embed
+ * @param {string} fileHandle
+ * @return {P}
+ */
+Prism.prototype.fileEmbed = function(fileHandle){
+  var that = this
+  var client = {}
+  return that.prepare()
+    .then(function(result){
+      client = result
+      return client.getAsync({
+        url: client.url('/file/embed'),
+        qs: {
+          handle: fileHandle
         }
       })
     })
@@ -665,10 +793,12 @@ Prism.prototype.fileUpload = function(localFile){
 
 /**
  * Move a File or Folder
- * @param {string} filePath
+ * @param {array} folderList
+ * @param {array} fileList
+ * @param {string} destinationPath
  * @return {P}
  */
-Prism.prototype.fileMove = function(filePath){
+Prism.prototype.fileMove = function(folderList,fileList,destinationPath){
   var that = this
   var client = {}
   return that.prepare()
@@ -677,7 +807,9 @@ Prism.prototype.fileMove = function(filePath){
       return client.postAsync({
         url: client.url('/file/move'),
         json: {
-          move: filePath
+          folderList: folderList || [],
+          fileList: fileList || [],
+          destinationPath: destinationPath
         }
       })
     })
@@ -701,7 +833,7 @@ Prism.prototype.fileDelete = function(filePath){
     .then(function(result){
       client = result
       return client.postAsync({
-        url: client.url('/file/delete'),
+        url: client.url('/file/remove'),
         json: {
           path: filePath
         }
