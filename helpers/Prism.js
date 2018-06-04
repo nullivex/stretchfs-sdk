@@ -559,6 +559,163 @@ Prism.prototype.jobContentUrl = function(handle,file){
 
 
 /**
+ * Folder create
+ * @param {string} folderPath
+ * @return {P}
+ */
+Prism.prototype.folderCreate = function(folderPath){
+  var that = this
+  var client = {}
+  return that.prepare()
+    .then(function(result){
+      client = result
+      return client.postAsync({
+        url: client.url('/file/folderCreate'),
+        json: {
+          path: folderPath
+        }
+      })
+    })
+    .spread(that.api.validateResponse())
+    .spread(function(res,body){
+      return body
+    })
+    .catch(that.handleNetworkError)
+}
+
+
+/**
+ * Folder delete
+ * @param {string} folderPath
+ * @return {P}
+ */
+Prism.prototype.folderDelete = function(folderPath){
+  var that = this
+  var client = {}
+  return that.prepare()
+    .then(function(result){
+      client = result
+      return client.postAsync({
+        url: client.url('/file/folderDelete'),
+        json: {
+          path: folderPath
+        }
+      })
+    })
+    .spread(that.api.validateResponse())
+    .spread(function(res,body){
+      return body
+    })
+    .catch(that.handleNetworkError)
+}
+
+
+/**
+ * File detail
+ * @param {string} filePath
+ * @return {P}
+ */
+Prism.prototype.fileDetail = function(filePath){
+  var that = this
+  var client = {}
+  return that.prepare()
+    .then(function(result){
+      client = result
+      return client.postAsync({
+        url: client.url('/file/detail'),
+        json: {
+          path: filePath
+        }
+      })
+    })
+    .spread(that.api.validateResponse())
+    .spread(function(res,body){
+      return body
+    })
+    .catch(that.handleNetworkError)
+}
+
+
+/**
+ * Upload a file from a path
+ * @param {string} localFile
+ * @return {P}
+ */
+Prism.prototype.fileUpload = function(localFile){
+  var that = this
+  var client = {}
+  return that.prepare()
+    .then(function(result){
+      client = result
+      return client.postAsync({
+        url: client.url('/file/upload'),
+        json: true,
+        formData: {
+          file: fs.createReadStream(path.resolve(localFile))
+        }
+      })
+    })
+    .spread(that.api.validateResponse())
+    .spread(function(res,body){
+      return body
+    })
+    .catch(that.handleNetworkError)
+}
+
+
+/**
+ * Move a File or Folder
+ * @param {string} filePath
+ * @return {P}
+ */
+Prism.prototype.fileMove = function(filePath){
+  var that = this
+  var client = {}
+  return that.prepare()
+    .then(function(result){
+      client = result
+      return client.postAsync({
+        url: client.url('/file/move'),
+        json: {
+          move: filePath
+        }
+      })
+    })
+    .spread(that.api.validateResponse())
+    .spread(function(res,body){
+      return body
+    })
+    .catch(that.handleNetworkError)
+}
+
+
+/**
+ * Delete a File
+ * @param {string} filePath
+ * @return {P}
+ */
+Prism.prototype.fileDelete = function(filePath){
+  var that = this
+  var client = {}
+  return that.prepare()
+    .then(function(result){
+      client = result
+      return client.postAsync({
+        url: client.url('/file/delete'),
+        json: {
+          path: filePath
+        }
+      })
+    })
+    .spread(that.api.validateResponse())
+    .spread(function(res,body){
+      return body
+    })
+    .catch(that.handleNetworkError)
+}
+
+
+/**
  * Export Prism
  * @type {Prism}
  */

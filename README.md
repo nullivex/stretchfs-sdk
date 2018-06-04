@@ -75,6 +75,9 @@ describe('my test',function(){
 
 ## Changelog
 
+### 4.0.2
+* Add file and folder management calls
+
 ### 4.0.1
 * Content purchase now takes the IP argument that will lock the purchase
 to a requesting viewers IP.
