@@ -77,6 +77,7 @@ describe('my test',function(){
 
 ### 4.0.2
 * Add file and folder management calls
+* More reliably report errors
 
 ### 4.0.1
 * Content purchase now takes the IP argument that will lock the purchase

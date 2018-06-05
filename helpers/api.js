@@ -82,6 +82,7 @@ var validateResponse = function(){
         body = JSON.parse(body)
     }
     if('object' === typeof body && body.error){
+      if(body.message) throw new Error(body.message)
       if(body.error.message) throw new Error(body.error.message)
       if(body.error) throw new Error(body.error)
     }
