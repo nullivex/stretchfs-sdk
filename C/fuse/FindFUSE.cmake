@@ -8,7 +8,7 @@
 if(MSVC AND NOT FUSE_DIR)
     #Windows, no preloaded hint so assume default install location for WinFsp
     set(FUSE_DIR "C:/Program Files (x86)/WinFsp")
-endif(MSVC AND NOT FUSE_DIR)
+endif()
 
 if(FUSE_INCLUDE_DIRS AND FUSE_LIBRARIES)
 set(FUSE_FIND_QUIETLY TRUE)
@@ -32,7 +32,7 @@ elseif(CMAKE_CL_64)
             ${FUSE_DIR}
             PATH_SUFFIXES lib )
 elseif(CMAKE_CL)
-    find_library( FUSE_LIBRARY winfsp-x32
+    find_library( FUSE_LIBRARY winfsp-x86
             HINTS
             ${FUSE_DIR}
             PATH_SUFFIXES lib )
