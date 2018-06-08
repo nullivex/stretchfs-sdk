@@ -3,11 +3,16 @@ project(sfs_fuse C)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_VERBOSE_MAKEFILE ON)
+# not using C++ / do this to avoid dumb warning about its non-use
+set(CMAKE_CXX_COMPILER "")
 
+###=> Setup paths
 set(DEPS "${CMAKE_SOURCE_DIR}/deps")
 set(CMAKE_PREFIX_PATH ${DEPS})
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
 
-# Find Threads
+###=> Find Dependencies
+  #=>   ...Threads
 find_package(Threads REQUIRED)
 if(WIN32)
     set(USE_THREADS_WIN32 ON)
@@ -15,18 +20,23 @@ else()
     set(USE_THREADS_POSIX ${CMAKE_USE_PTHREADS_INIT})
     set(HAVE_PTHREAD_H ${CMAKE_USE_PTHREADS_INIT})
 endif()
-set(LIBS ${LIBS} ${CMAKE_THREAD_LIBS_INIT})
-
-# Find CURL
+  #=>   ...CURL
 find_package(CURL REQUIRED)
-set(LIBS ${LIBS} ${CURL_LIBRARIES})
+  #=>   ...FUSE
+find_package(FUSE REQUIRED)
 
 
-add_executable(sfs_fuse main.c)
+###=> Define executable and includes/libraries
+add_executable(sfs_fuse
+        main.c
+        )
 target_include_directories(sfs_fuse PUBLIC
         "${DEPS}/include"
+        "${FUSE_INCLUDE_DIRS}"
         )
 target_link_libraries(sfs_fuse
-        "${DEPS}/lib/libcurl.lib"
+        "${CMAKE_THREAD_LIBS_INIT}"
         "${DEPS}/lib/json-c.lib"
+        "${CURL_LIBRARIES}"
+        "${FUSE_LIBRARIES}"
         )
