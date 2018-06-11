@@ -28,7 +28,13 @@ find_package(FUSE REQUIRED)
 if(MSVC)
     # Microsoft compiler thinks standard C functions are insecure, and prints warnings
     #  but using their version of functions won't compile on standard gcc - NO THANKS
+    message("Enabling -D_CRT_SECURE_NO_WARNINGS")
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif()
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    message("Enabling -DDEBUG")
+    add_definitions(-DDEBUG)
 endif()
 
 ###=> Define executable and includes/libraries
