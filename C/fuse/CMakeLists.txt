@@ -25,6 +25,11 @@ find_package(CURL REQUIRED)
   #=>   ...FUSE
 find_package(FUSE REQUIRED)
 
+if(MSVC)
+    # Microsoft compiler thinks standard C functions are insecure, and prints warnings
+    #  but using their version of functions won't compile on standard gcc - NO THANKS
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif()
 
 ###=> Define executable and includes/libraries
 add_executable(sfs_fuse
