@@ -6,9 +6,6 @@
 //#include <sys/types.h>
 //#include <fcntl.h>
 //#include <io.h>
-#ifdef MSVC
-#include <windows.h>
-#endif
 
 //#define DEBUG 1
 
@@ -19,6 +16,8 @@
 
 #define CONFIGFILE "config.json"
 
+#ifdef _MSC_VER
+#include <windows.h>
 /*
  * Map low I/O functions for MS. This allows us to disable MS language
  * extensions for maximum portability.
@@ -42,6 +41,7 @@
 #define S_IREAD         _S_IREAD
 #define S_IWRITE        _S_IWRITE
 #define S_IFDIR         _S_IFDIR
+#endif
 
 struct json_object *cfg;
 
@@ -60,6 +60,7 @@ struct MemoryStruct {
     size_t page;
     size_t size;
     size_t ptr;
+    struct json_object *parsed;
 };
 
 #define PAGESIZE 4096
@@ -228,9 +229,8 @@ int main(int argc, char *argv[]){
 #ifdef DEBUG
         printf("\nResult:\n%s\n",chunk.memory);
 
-        struct json_object *parsed;
-        parsed = json_tokener_parse(chunk.memory);
-        printf("parsed result:\n%s\n",json_object_to_json_string_ext(parsed,JSON_C_TO_STRING_PRETTY));
+        chunk.parsed = json_tokener_parse(chunk.memory);
+        printf("parsed result:\n%s\n",json_object_to_json_string_ext(chunk.parsed,JSON_C_TO_STRING_PRETTY));
         sync();
 #endif
 
