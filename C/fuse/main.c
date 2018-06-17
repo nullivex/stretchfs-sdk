@@ -84,10 +84,10 @@ InitMemory(void *userp) {
 #else
     mem->page = PAGESIZE;
 #endif
-    mem->memory = malloc(mem->page);  /* will be grown as needed by the realloc above */
-    mem->size = mem->page;
-    mem->ptr = 0;    /* no data at this point */
-    mem->memory[mem->ptr] = 0;
+    mem->memory = malloc(mem->page); /* will be grown as needed by the realloc in WriteMemoryCallback */
+    mem->size = mem->page;           /* size is total alloc bytes */
+    mem->ptr = 0;                    /* no data at this point */
+    mem->memory[mem->ptr] = 0;       /* ensure null at first byte (cstr thus no need to memset entire page) */
 #ifdef DEBUG
     printf("Allocated receive buffer (%u bytes)\n",(unsigned int)mem->size);
 #endif
@@ -140,7 +140,8 @@ int main(int argc, char *argv[]){
     }
     unsigned int size = (unsigned int)(st.st_size);
 #ifdef DEBUG
-    printf("Loading cfg from %s, size: %d\n",CONFIGFILE,size); sync();
+    printf("Loading cfg from %s, size: %d\n",CONFIGFILE,size);
+    sync();
 #endif
 
     FILE *fd;
@@ -162,7 +163,8 @@ int main(int argc, char *argv[]){
         free(inbuf);
     }
 #ifdef DEBUG
-    printf("got cfg:\n%s\n",json_object_to_json_string_ext(cfg,JSON_C_TO_STRING_PRETTY)); sync();
+    printf("got cfg:\n%s\n",json_object_to_json_string_ext(cfg,JSON_C_TO_STRING_PRETTY));
+    sync();
 #endif
 
     char baseurl[255], username[64], password[64];
@@ -225,6 +227,11 @@ int main(int argc, char *argv[]){
 
 #ifdef DEBUG
         printf("\nResult:\n%s\n",chunk.memory);
+
+        struct json_object *parsed;
+        parsed = json_tokener_parse(chunk.memory);
+        printf("parsed result:\n%s\n",json_object_to_json_string_ext(parsed,JSON_C_TO_STRING_PRETTY));
+        sync();
 #endif
 
         /* always cleanup */
