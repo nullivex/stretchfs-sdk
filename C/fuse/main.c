@@ -6,6 +6,9 @@
 //#include <sys/types.h>
 //#include <fcntl.h>
 //#include <io.h>
+#ifdef MSVC
+#include <windows.h>
+#endif
 
 //#define DEBUG 1
 
@@ -51,6 +54,82 @@ void cfg_get_string(const char * key, char passback[]){
 
 void sync();
 void sync(){ fflush(stdout); fflush(stderr); }
+
+struct MemoryStruct {
+    char *memory;
+    size_t page;
+    size_t size;
+    size_t ptr;
+};
+
+#define PAGESIZE 4096
+void
+InitMemory(void *userp) {
+    struct MemoryStruct *mem = (struct MemoryStruct *)userp;
+#ifdef _MSC_VER
+    SYSTEM_INFO siSysInfo;
+    GetSystemInfo(&siSysInfo);
+    // Display the contents of the SYSTEM_INFO structure.
+    /*
+    printf("Hardware information: \n");
+    printf("  OEM ID: %u\n", siSysInfo.dwOemId);
+    printf("  Number of processors: %u\n",siSysInfo.dwNumberOfProcessors);
+    printf("  Page size: %u\n", siSysInfo.dwPageSize);
+    printf("  Processor type: %u\n", siSysInfo.dwProcessorType);
+    printf("  Minimum application address: %lx\n",siSysInfo.lpMinimumApplicationAddress);
+    printf("  Maximum application address: %lx\n",siSysInfo.lpMaximumApplicationAddress);
+    printf("  Active processor mask: %u\n",siSysInfo.dwActiveProcessorMask);
+     */
+    mem->page = siSysInfo.dwPageSize;
+#else
+    mem->page = PAGESIZE;
+#endif
+    mem->memory = malloc(mem->page);  /* will be grown as needed by the realloc above */
+    mem->size = mem->page;
+    mem->ptr = 0;    /* no data at this point */
+    mem->memory[mem->ptr] = 0;
+#ifdef DEBUG
+    printf("Allocated receive buffer (%u bytes)\n",(unsigned int)mem->size);
+#endif
+}
+
+static size_t
+WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
+{
+#ifdef DEBUG
+    printf("[");
+#endif
+    size_t realsize = size * nmemb;
+    struct MemoryStruct *mem = (struct MemoryStruct *)userp;
+
+    size_t cur_pages = (mem->size / mem->page);
+    size_t new_pages= ((mem->ptr + realsize + 1) / mem->page) + 1;
+    if(cur_pages != new_pages){
+        mem->memory = realloc(mem->memory, mem->page * new_pages);
+        if(mem->memory == NULL) {
+            /* out of memory! */
+            printf("not enough memory (realloc returned NULL for %u->%u)\n",
+                   (unsigned int)(mem->page * cur_pages),
+                   (unsigned int)(mem->page * new_pages)
+            );
+            return 0;
+        } else {
+            mem->size = mem->page * new_pages;
+        }
+#ifdef DEBUG
+        printf("^");
+#endif
+    }
+
+    memcpy(&(mem->memory[mem->ptr]), contents, realsize);
+    mem->ptr += realsize;
+    mem->memory[mem->ptr] = 0;
+
+#ifdef DEBUG
+    printf("%u]",(unsigned int)realsize);
+#endif
+    return realsize;
+}
 
 int main(int argc, char *argv[]){
     struct stat st;
@@ -104,6 +183,7 @@ int main(int argc, char *argv[]){
         sprintf(url,"%s/user/login",baseurl);
         curl_easy_setopt(curl, CURLOPT_URL, url);
         curl_easy_setopt(curl, CURLOPT_REFERER, url); //"http://localhost:8160/");
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, "sfs-fuse/1.0");
         //curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
         curl_easy_setopt(curl, CURLOPT_POST, 1L);
@@ -119,6 +199,14 @@ int main(int argc, char *argv[]){
         json_object_object_add(json, "username", json_object_new_string(username));
         json_object_object_add(json, "password", json_object_new_string(password));
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_object_to_json_string_ext(json,JSON_C_TO_STRING_PLAIN));
+
+        /* we pass our 'chunk' struct to the callback function */
+        struct MemoryStruct chunk;
+        InitMemory((void *)&chunk);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
+        /* send all data to this callback */
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+
         /* do the thing */
 #ifdef DEBUG
         printf("hitting %s\nwith payload:\n%s\n",url,json_object_to_json_string_ext(json,JSON_C_TO_STRING_PRETTY));
@@ -134,6 +222,10 @@ int main(int argc, char *argv[]){
             fprintf(stderr,"curl_easy_perform() failed: %s\n",
                    curl_easy_strerror(res));
         }
+
+#ifdef DEBUG
+        printf("\nResult:\n%s\n",chunk.memory);
+#endif
 
         /* always cleanup */
         curl_easy_cleanup(curl);
