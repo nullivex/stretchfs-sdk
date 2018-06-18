@@ -185,31 +185,49 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
     return realsize;
 }
 
-int main(int argc, char *argv[]){
-    struct StateStruct S;
-    InitState((void *)&S);
-    InitMemory((void *)&(S.curl.recvd));
-
+void
+InitCURL(void *userp) {
+    struct StateStruct *state = (struct StateStruct *) userp;
     /* In windows, this will init the winsock stuff */
     curl_global_init(CURL_GLOBAL_ALL);
 
     /* get a curl handle */
-    S.curl.handle = curl_easy_init();
-    if(S.curl.handle){
-        curl_easy_setopt(S.curl.handle, CURLOPT_USERAGENT, "sfs-fuse/1.0");
-        //curl_easy_setopt(S.curl.handle, CURLOPT_VERBOSE, 1L);
-        curl_easy_setopt(S.curl.handle, CURLOPT_SSL_VERIFYPEER, 0L);
+    state->curl.handle = curl_easy_init();
+    if(state->curl.handle){
+        curl_easy_setopt(state->curl.handle, CURLOPT_USERAGENT, "sfs-fuse/1.0");
+        //curl_easy_setopt(state->curl.handle, CURLOPT_VERBOSE, 1L);
+        curl_easy_setopt(state->curl.handle, CURLOPT_SSL_VERIFYPEER, 0L);
 
         /* Headers */
-        S.curl.headers = curl_slist_append(S.curl.headers, "Accept: application/json");
-        S.curl.headers = curl_slist_append(S.curl.headers, "Content-Type: application/json");
-        curl_easy_setopt(S.curl.handle, CURLOPT_HTTPHEADER, S.curl.headers);
+        state->curl.headers = curl_slist_append(state->curl.headers, "Accept: application/json");
+        state->curl.headers = curl_slist_append(state->curl.headers, "Content-Type: application/json");
+        curl_easy_setopt(state->curl.handle, CURLOPT_HTTPHEADER, state->curl.headers);
 
         /* we pass our 'chunk' struct to the callback function */
-        curl_easy_setopt(S.curl.handle, CURLOPT_WRITEDATA, (void *)&(S.curl.recvd));
+        curl_easy_setopt(state->curl.handle, CURLOPT_WRITEDATA, (void *) &(state->curl.recvd));
         /* send all data to this callback */
-        curl_easy_setopt(S.curl.handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+        curl_easy_setopt(state->curl.handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+    }
+}
+static size_t
+PerformCURL(void *userp){
+    struct StateStruct *state = (struct StateStruct *) userp;
 
+    state->curl.result = curl_easy_perform(state->curl.handle);
+    /* Check for errors */
+    if(state->curl.result != CURLE_OK){
+        fprintf(stderr,"curl_easy_perform() failed: %s\n",
+                curl_easy_strerror(state->curl.result));
+        return -1;
+    } else return 0;
+}
+
+int main(int argc, char *argv[]){
+    struct StateStruct S;
+    InitState((void *)&S);
+    InitMemory((void *)&(S.curl.recvd));
+    InitCURL((void *)&S);
+    if(S.curl.handle){
         char url[512];
         sprintf(url,"%s/user/login",S.baseurl);
         curl_easy_setopt(S.curl.handle, CURLOPT_URL, url);
@@ -228,21 +246,14 @@ int main(int argc, char *argv[]){
         printf("hitting %s\nwith payload:\n%s\n",url,json_object_to_json_string_ext(json,JSON_C_TO_STRING_PRETTY));
         sync();
 #endif
-        S.curl.result = curl_easy_perform(S.curl.handle);
-
-        /* Check for errors */
-        if(S.curl.result != CURLE_OK){
-            fprintf(stderr,"curl_easy_perform() failed: %s\n",
-                   curl_easy_strerror(S.curl.result));
-        }
-
+        if(0 == PerformCURL((void *)&S)){
+            S.curl.recvd.parsed = json_tokener_parse(S.curl.recvd.memory);
 #ifdef DEBUG
-        printf("\nResult:\n%s\n",S.curl.recvd.memory);
-
-        S.curl.recvd.parsed = json_tokener_parse(S.curl.recvd.memory);
-        printf("parsed result:\n%s\n",json_object_to_json_string_ext(S.curl.recvd.parsed,JSON_C_TO_STRING_PRETTY));
-        sync();
+            printf("\nResult:\n%s\n",S.curl.recvd.memory);
+            printf("parsed result:\n%s\n",json_object_to_json_string_ext(S.curl.recvd.parsed,JSON_C_TO_STRING_PRETTY));
+            sync();
 #endif
+        }
 
         /* always cleanup */
         curl_slist_free_all(S.curl.headers);
