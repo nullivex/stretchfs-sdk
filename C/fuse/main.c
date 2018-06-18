@@ -52,10 +52,12 @@ struct StateStruct {
     char username[64];
     char password[64];
     CURL *curl;
+    struct curl_slist *headers;
 };
 void
 InitState(void *userp) {
     struct StateStruct *state = (struct StateStruct *) userp;
+    state->headers = NULL;
 
     struct stat st;
     if(stat(CONFIGFILE, &st) != 0){
@@ -188,26 +190,14 @@ int main(int argc, char *argv[]){
     /* get a curl handle */
     S.curl = curl_easy_init();
     if(S.curl) {
-        char url[512];
-        sprintf(url,"%s/user/login",S.baseurl);
-        curl_easy_setopt(S.curl, CURLOPT_URL, url);
-        curl_easy_setopt(S.curl, CURLOPT_REFERER, url); //"http://localhost:8160/");
         curl_easy_setopt(S.curl, CURLOPT_USERAGENT, "sfs-fuse/1.0");
         //curl_easy_setopt(S.curl, CURLOPT_VERBOSE, 1L);
         curl_easy_setopt(S.curl, CURLOPT_SSL_VERIFYPEER, 0L);
-        curl_easy_setopt(S.curl, CURLOPT_POST, 1L);
+
         /* Headers */
-        struct curl_slist *headers = NULL;
-        headers = curl_slist_append(headers, "Accept: application/json");
-        headers = curl_slist_append(headers, "Content-Type: application/json");
-        curl_easy_setopt(S.curl, CURLOPT_HTTPHEADER, headers);
-        /* POST data */
-        json_object *json;
-        json = json_object_new_object();
-        json_object_object_add(json, "tokenType", json_object_new_string("permanent"));
-        json_object_object_add(json, "username", json_object_new_string(S.username));
-        json_object_object_add(json, "password", json_object_new_string(S.password));
-        curl_easy_setopt(S.curl, CURLOPT_POSTFIELDS, json_object_to_json_string_ext(json,JSON_C_TO_STRING_PLAIN));
+        S.headers = curl_slist_append(S.headers, "Accept: application/json");
+        S.headers = curl_slist_append(S.headers, "Content-Type: application/json");
+        curl_easy_setopt(S.curl, CURLOPT_HTTPHEADER, S.headers);
 
         /* we pass our 'chunk' struct to the callback function */
         struct MemoryStruct chunk;
@@ -216,6 +206,19 @@ int main(int argc, char *argv[]){
         /* send all data to this callback */
         curl_easy_setopt(S.curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 
+        char url[512];
+        sprintf(url,"%s/user/login",S.baseurl);
+        curl_easy_setopt(S.curl, CURLOPT_URL, url);
+        curl_easy_setopt(S.curl, CURLOPT_REFERER, url); //"http://localhost:8160/");
+        /* POST data */
+        curl_easy_setopt(S.curl, CURLOPT_POST, 1L);
+        json_object *json;
+        json = json_object_new_object();
+        json_object_object_add(json, "tokenType", json_object_new_string("permanent"));
+        json_object_object_add(json, "username", json_object_new_string(S.username));
+        json_object_object_add(json, "password", json_object_new_string(S.password));
+        curl_easy_setopt(S.curl, CURLOPT_POSTFIELDS, json_object_to_json_string_ext(json,JSON_C_TO_STRING_PLAIN));
+
         /* do the thing */
 #ifdef DEBUG
         printf("hitting %s\nwith payload:\n%s\n",url,json_object_to_json_string_ext(json,JSON_C_TO_STRING_PRETTY));
@@ -223,8 +226,6 @@ int main(int argc, char *argv[]){
 #endif
         CURLcode res;
         res = curl_easy_perform(S.curl);
-
-        curl_slist_free_all(headers);
 
         /* Check for errors */
         if(res != CURLE_OK){
@@ -241,6 +242,7 @@ int main(int argc, char *argv[]){
 #endif
 
         /* always cleanup */
+        curl_slist_free_all(S.headers);
         curl_easy_cleanup(S.curl);
     }
     curl_global_cleanup();
