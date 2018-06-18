@@ -46,9 +46,19 @@ void sync();
 void sync(){ fflush(stdout); fflush(stderr); }
 
 #define CONFIGFILE "config.json"
+#define PAGESIZE 4096
+struct MemoryStruct {
+    char *memory;
+    size_t page;
+    size_t size;
+    size_t ptr;
+    struct json_object *parsed;
+};
 struct CURLStruct {
     CURL *handle;
     struct curl_slist *headers;
+    CURLcode result;
+    struct MemoryStruct recvd;
 };
 struct StateStruct {
     struct json_object *cfg;
@@ -106,14 +116,6 @@ InitState(void *userp) {
     CFG_GET_STRING(password);
 }
 
-#define PAGESIZE 4096
-struct MemoryStruct {
-    char *memory;
-    size_t page;
-    size_t size;
-    size_t ptr;
-    struct json_object *parsed;
-};
 void
 InitMemory(void *userp) {
     struct MemoryStruct *mem = (struct MemoryStruct *)userp;
@@ -186,6 +188,7 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 int main(int argc, char *argv[]){
     struct StateStruct S;
     InitState((void *)&S);
+    InitMemory((void *)&(S.curl.recvd));
 
     /* In windows, this will init the winsock stuff */
     curl_global_init(CURL_GLOBAL_ALL);
@@ -203,9 +206,7 @@ int main(int argc, char *argv[]){
         curl_easy_setopt(S.curl.handle, CURLOPT_HTTPHEADER, S.curl.headers);
 
         /* we pass our 'chunk' struct to the callback function */
-        struct MemoryStruct chunk;
-        InitMemory((void *)&chunk);
-        curl_easy_setopt(S.curl.handle, CURLOPT_WRITEDATA, (void *)&chunk);
+        curl_easy_setopt(S.curl.handle, CURLOPT_WRITEDATA, (void *)&(S.curl.recvd));
         /* send all data to this callback */
         curl_easy_setopt(S.curl.handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 
@@ -227,20 +228,19 @@ int main(int argc, char *argv[]){
         printf("hitting %s\nwith payload:\n%s\n",url,json_object_to_json_string_ext(json,JSON_C_TO_STRING_PRETTY));
         sync();
 #endif
-        CURLcode res;
-        res = curl_easy_perform(S.curl.handle);
+        S.curl.result = curl_easy_perform(S.curl.handle);
 
         /* Check for errors */
-        if(res != CURLE_OK){
+        if(S.curl.result != CURLE_OK){
             fprintf(stderr,"curl_easy_perform() failed: %s\n",
-                   curl_easy_strerror(res));
+                   curl_easy_strerror(S.curl.result));
         }
 
 #ifdef DEBUG
-        printf("\nResult:\n%s\n",chunk.memory);
+        printf("\nResult:\n%s\n",S.curl.recvd.memory);
 
-        chunk.parsed = json_tokener_parse(chunk.memory);
-        printf("parsed result:\n%s\n",json_object_to_json_string_ext(chunk.parsed,JSON_C_TO_STRING_PRETTY));
+        S.curl.recvd.parsed = json_tokener_parse(S.curl.recvd.memory);
+        printf("parsed result:\n%s\n",json_object_to_json_string_ext(S.curl.recvd.parsed,JSON_C_TO_STRING_PRETTY));
         sync();
 #endif
 
