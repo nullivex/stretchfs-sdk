@@ -60,12 +60,17 @@ struct CURLStruct {
     CURLcode result;
     struct MemoryStruct recvd;
 };
+struct SessionStruct {
+    int64_t UserId;
+    char token[255];
+};
 struct StateStruct {
     struct json_object *cfg;
     char baseurl[255];
     char username[64];
     char password[64];
     struct CURLStruct curl;
+    struct SessionStruct session;
 };
 void
 InitState(void *userp) {
@@ -222,43 +227,76 @@ PerformCURL(void *userp){
     } else return 0;
 }
 
+struct PostOpts {
+    char uri[512];
+    json_object *json;
+};
+static size_t
+PostCURL(void *userp,struct PostOpts post){
+    struct StateStruct *state = (struct StateStruct *) userp;
+    char url[512];
+    sprintf(url,"%s/user/login",state->baseurl);
+    curl_easy_setopt(state->curl.handle, CURLOPT_URL, url);
+    curl_easy_setopt(state->curl.handle, CURLOPT_REFERER, url); //"http://localhost:8160/");
+    /* POST data */
+    curl_easy_setopt(state->curl.handle, CURLOPT_POST, 1L);
+    curl_easy_setopt(state->curl.handle, CURLOPT_POSTFIELDS, json_object_to_json_string_ext(post.json,JSON_C_TO_STRING_PLAIN));
+#ifdef DEBUG
+    printf("hitting POST %s with payload:\n%s\n",url,json_object_to_json_string_ext(post.json,JSON_C_TO_STRING_PRETTY));
+    sync();
+#endif
+    size_t rv = PerformCURL(userp);
+    if(0 == rv){
+        state->curl.recvd.parsed = json_tokener_parse(state->curl.recvd.memory);
+#ifdef DEBUG
+        printf("\nResult:\n%s\n", state->curl.recvd.memory);
+        printf("parsed result:\n%s\n", json_object_to_json_string_ext(state->curl.recvd.parsed, JSON_C_TO_STRING_PRETTY));
+        sync();
+#endif
+    }
+    return rv;
+}
+
+static size_t
+SFS_Login(void *userp){
+    struct StateStruct *state = (struct StateStruct *) userp;
+    struct PostOpts post;
+    sprintf(post.uri,"/user/login");
+    post.json = json_object_new_object();
+    json_object_object_add(post.json, "tokenType", json_object_new_string("permanent"));
+    json_object_object_add(post.json, "username", json_object_new_string(state->username));
+    json_object_object_add(post.json, "password", json_object_new_string(state->password));
+    size_t rv = PostCURL(userp,post);
+    if(0 == rv){
+        //handle session data
+        struct json_object *session;
+        json_object_object_get_ex(state->curl.recvd.parsed,"session",&session);
+        struct json_object *value;
+        json_object_object_get_ex(session,"UserId",&value);
+        state->session.UserId = json_object_get_int64(value);
+        json_object_object_get_ex(session,"token",&value);
+        sprintf(state->session.token,"%s",json_object_get_string(value));
+    }
+    return rv;
+}
+
 int main(int argc, char *argv[]){
     struct StateStruct S;
     InitState((void *)&S);
     InitMemory((void *)&(S.curl.recvd));
     InitCURL((void *)&S);
     if(S.curl.handle){
-        char url[512];
-        sprintf(url,"%s/user/login",S.baseurl);
-        curl_easy_setopt(S.curl.handle, CURLOPT_URL, url);
-        curl_easy_setopt(S.curl.handle, CURLOPT_REFERER, url); //"http://localhost:8160/");
-        /* POST data */
-        curl_easy_setopt(S.curl.handle, CURLOPT_POST, 1L);
-        json_object *json;
-        json = json_object_new_object();
-        json_object_object_add(json, "tokenType", json_object_new_string("permanent"));
-        json_object_object_add(json, "username", json_object_new_string(S.username));
-        json_object_object_add(json, "password", json_object_new_string(S.password));
-        curl_easy_setopt(S.curl.handle, CURLOPT_POSTFIELDS, json_object_to_json_string_ext(json,JSON_C_TO_STRING_PLAIN));
-
         /* do the thing */
-#ifdef DEBUG
-        printf("hitting %s\nwith payload:\n%s\n",url,json_object_to_json_string_ext(json,JSON_C_TO_STRING_PRETTY));
-        sync();
-#endif
-        if(0 == PerformCURL((void *)&S)){
-            S.curl.recvd.parsed = json_tokener_parse(S.curl.recvd.memory);
-#ifdef DEBUG
-            printf("\nResult:\n%s\n",S.curl.recvd.memory);
-            printf("parsed result:\n%s\n",json_object_to_json_string_ext(S.curl.recvd.parsed,JSON_C_TO_STRING_PRETTY));
+        if(0 == SFS_Login((void *)&S)){
+            printf("SFS Login succeeded, userId [%u] token [%s]\n",
+                   (unsigned int)(S.session.UserId), S.session.token
+            );
             sync();
-#endif
         }
-
-        /* always cleanup */
-        curl_slist_free_all(S.curl.headers);
-        curl_easy_cleanup(S.curl.handle);
     }
+    /* always cleanup */
+    curl_slist_free_all(S.curl.headers);
+    curl_easy_cleanup(S.curl.handle);
     curl_global_cleanup();
     return 0;
 }
