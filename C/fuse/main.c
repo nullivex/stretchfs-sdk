@@ -13,8 +13,7 @@
 #include <curl/curl.h>
 /* json-c (https://github.com/json-c/json-c) */
 #include <json-c/json.h>
-
-#define CONFIGFILE "config.json"
+enum json_tokener_error jerr = json_tokener_success;    /* json parse error */
 
 #ifdef _MSC_VER
 #include <windows.h>
@@ -43,17 +42,62 @@
 #define S_IFDIR         _S_IFDIR
 #endif
 
-struct json_object *cfg;
-
-void cfg_get_string(const char * key, char passback[]);
-void cfg_get_string(const char * key, char passback[]){
-    struct json_object *value;
-    json_object_object_get_ex(cfg,key,&value);
-    sprintf(passback,"%s",json_object_get_string(value));
-}
-
 void sync();
 void sync(){ fflush(stdout); fflush(stderr); }
+
+#define CONFIGFILE "config.json"
+struct StateStruct {
+    struct json_object *cfg;
+    char baseurl[255];
+    char username[64];
+    char password[64];
+};
+void
+InitState(void *userp) {
+    struct StateStruct *state = (struct StateStruct *) userp;
+
+    struct stat st;
+    if(stat(CONFIGFILE, &st) != 0){
+        fprintf(stderr, "cannot stat file '%s': ", CONFIGFILE);
+        perror("");
+        exit(-1);
+    }
+    unsigned int size = (unsigned int)(st.st_size);
+#ifdef DEBUG
+    printf("Loading cfg from %s, size: %d\n",CONFIGFILE,size);
+    sync();
+#endif
+
+    FILE *fd;
+    errno_t err;
+    if((err = fopen_s(&fd,CONFIGFILE,"r")) != 0){
+        fprintf(stderr, "cannot open file '%s': %s\n", CONFIGFILE, strerror(err));
+        exit(-1);
+    } else {
+        char *inbuf = NULL;
+        inbuf = (char *) malloc(size+1);
+        if(0>fread(inbuf,size,1,fd)){
+            fprintf(stderr, "cannot read file '%s': ", CONFIGFILE);
+            perror("");
+            exit(-1);
+        }
+        fclose(fd);
+        inbuf[size] = '\0';
+        state->cfg = json_tokener_parse(inbuf);
+        free(inbuf);
+    }
+#ifdef DEBUG
+    printf("got cfg:\n%s\n",json_object_to_json_string_ext(state->cfg,JSON_C_TO_STRING_PRETTY));
+    sync();
+#endif
+    struct json_object *value;
+    #define CFG_GET_STRING(KEY) \
+        json_object_object_get_ex(state->cfg,#KEY,&value); \
+        sprintf(state->KEY,"%s",json_object_get_string(value));
+    CFG_GET_STRING(baseurl);
+    CFG_GET_STRING(username);
+    CFG_GET_STRING(password);
+}
 
 struct MemoryStruct {
     char *memory;
@@ -128,52 +172,14 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 
 #ifdef DEBUG
     printf("%u]",(unsigned int)realsize);
+    sync();
 #endif
     return realsize;
 }
 
 int main(int argc, char *argv[]){
-    struct stat st;
-    if(stat(CONFIGFILE, &st) != 0){
-        fprintf(stderr, "cannot stat file '%s': ", CONFIGFILE);
-        perror("");
-        exit(-1);
-    }
-    unsigned int size = (unsigned int)(st.st_size);
-#ifdef DEBUG
-    printf("Loading cfg from %s, size: %d\n",CONFIGFILE,size);
-    sync();
-#endif
-
-    FILE *fd;
-    errno_t err;
-    if((err = fopen_s(&fd,CONFIGFILE,"r")) != 0){
-        fprintf(stderr, "cannot open file '%s': %s\n", CONFIGFILE, strerror(err));
-        exit(-1);
-    } else {
-        char *inbuf = NULL;
-        inbuf = (char *) malloc(size+2);
-        if(0>fread(inbuf,size,1,fd)){
-            fprintf(stderr, "cannot read file '%s': ", CONFIGFILE);
-            perror("");
-            exit(-1);
-        }
-        fclose(fd);
-        inbuf[size+1] = '\0';
-        cfg = json_tokener_parse(inbuf);
-        free(inbuf);
-    }
-#ifdef DEBUG
-    printf("got cfg:\n%s\n",json_object_to_json_string_ext(cfg,JSON_C_TO_STRING_PRETTY));
-    sync();
-#endif
-
-    char baseurl[255], username[64], password[64];
-    cfg_get_string("baseurl",baseurl);
-    cfg_get_string("username",username);
-    cfg_get_string("password",password);
-
-    enum json_tokener_error jerr = json_tokener_success;    /* json parse error */
+    struct StateStruct S;
+    InitState((void *)&S);
 
     /* In windows, this will init the winsock stuff */
     curl_global_init(CURL_GLOBAL_ALL);
@@ -183,7 +189,7 @@ int main(int argc, char *argv[]){
     curl = curl_easy_init();
     if(curl) {
         char url[512];
-        sprintf(url,"%s/user/login",baseurl);
+        sprintf(url,"%s/user/login",S.baseurl);
         curl_easy_setopt(curl, CURLOPT_URL, url);
         curl_easy_setopt(curl, CURLOPT_REFERER, url); //"http://localhost:8160/");
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "sfs-fuse/1.0");
@@ -199,8 +205,8 @@ int main(int argc, char *argv[]){
         json_object *json;
         json = json_object_new_object();
         json_object_object_add(json, "tokenType", json_object_new_string("permanent"));
-        json_object_object_add(json, "username", json_object_new_string(username));
-        json_object_object_add(json, "password", json_object_new_string(password));
+        json_object_object_add(json, "username", json_object_new_string(S.username));
+        json_object_object_add(json, "password", json_object_new_string(S.password));
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_object_to_json_string_ext(json,JSON_C_TO_STRING_PLAIN));
 
         /* we pass our 'chunk' struct to the callback function */
