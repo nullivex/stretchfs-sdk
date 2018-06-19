@@ -26,7 +26,7 @@ InitState(void *userp){
         perror("");
         return FALSE;
     }
-    unsigned int size = (unsigned int)(st.st_size);
+    auto size = (unsigned int)(st.st_size);
 #ifdef DEBUG
     printf("Loading cfg from %s, size: %d\n",CONFIGFILE,size);
     sync();

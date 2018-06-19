@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.10)
 project(sfs_fuse C)
 
 set(CMAKE_C_STANDARD 99)
-set(CMAKE_VERBOSE_MAKEFILE ON)
 # not using C++ / do this to avoid dumb warning about its non-use
 set(CMAKE_CXX_COMPILER "")
 
@@ -33,8 +32,10 @@ if(MSVC)
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
-    message("Enabling -DDEBUG")
+    message("Enabling -DDEBUG, -Wall, and CMAKE_VERBOSE_MAKEFILE=ON")
     add_definitions(-DDEBUG)
+    add_definitions(-Wall)
+    set(CMAKE_VERBOSE_MAKEFILE ON)
 endif()
 
 ###=> Define executable and includes/libraries
