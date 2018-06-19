@@ -67,13 +67,19 @@ struct SessionStruct {
 struct StateStruct {
     struct json_object *cfg;
     char baseurl[255];
-    char username[64];
-    char password[64];
     struct CURLStruct curl;
     struct SessionStruct session;
 };
+
+void CFG_GetString(void *userp,char *key,char *dest){
+    struct StateStruct *state = (struct StateStruct *) userp;
+    struct json_object *value;
+    json_object_object_get_ex(state->cfg,key,&value);
+    sprintf(dest,"%s",json_object_get_string(value));
+}
+
 void
-InitState(void *userp) {
+InitState(void *userp){
     struct StateStruct *state = (struct StateStruct *) userp;
     state->curl.handle = NULL;
     state->curl.headers = NULL;
@@ -112,13 +118,7 @@ InitState(void *userp) {
     printf("got cfg:\n%s\n",json_object_to_json_string_ext(state->cfg,JSON_C_TO_STRING_PRETTY));
     sync();
 #endif
-    struct json_object *value;
-    #define CFG_GET_STRING(KEY) \
-        json_object_object_get_ex(state->cfg,#KEY,&value); \
-        sprintf(state->KEY,"%s",json_object_get_string(value));
-    CFG_GET_STRING(baseurl);
-    CFG_GET_STRING(username);
-    CFG_GET_STRING(password);
+    CFG_GetString(userp,"baseurl",state->baseurl);
 }
 
 void
@@ -258,14 +258,14 @@ PostCURL(void *userp,struct PostOpts post){
 }
 
 static size_t
-SFS_Login(void *userp){
+SFS_Login(void *userp,char username[],char password[]){
     struct StateStruct *state = (struct StateStruct *) userp;
     struct PostOpts post;
     sprintf(post.uri,"/user/login");
     post.json = json_object_new_object();
     json_object_object_add(post.json, "tokenType", json_object_new_string("permanent"));
-    json_object_object_add(post.json, "username", json_object_new_string(state->username));
-    json_object_object_add(post.json, "password", json_object_new_string(state->password));
+    json_object_object_add(post.json, "username", json_object_new_string(username));
+    json_object_object_add(post.json, "password", json_object_new_string(password));
     size_t rv = PostCURL(userp,post);
     if(0 == rv){
         //handle session data
@@ -283,11 +283,15 @@ SFS_Login(void *userp){
 int main(int argc, char *argv[]){
     struct StateStruct S;
     InitState((void *)&S);
+    char username[64];
+    char password[64];
+    CFG_GetString((void *)&S,"username",username);
+    CFG_GetString((void *)&S,"password",password);
     InitMemory((void *)&(S.curl.recvd));
     InitCURL((void *)&S);
     if(S.curl.handle){
         /* do the thing */
-        if(0 == SFS_Login((void *)&S)){
+        if(0 == SFS_Login((void *)&S,username,password)){
             printf("SFS Login succeeded, userId [%u] token [%s]\n",
                    (unsigned int)(S.session.UserId), S.session.token
             );
