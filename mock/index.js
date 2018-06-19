@@ -6,7 +6,6 @@ var express = require('express')
 var fs = require('graceful-fs')
 var https = require('https')
 var mime = require('mime')
-var promisePipe = require('promisepipe')
 var request = require('request')
 var sha1stream = require('sha1-stream')
 var temp = require('temp')
@@ -17,6 +16,7 @@ var contentExists = require('./helpers/contentExists')
 var job = require('./helpers/job')
 var NetworkError = require('../helpers/NetworkError')
 var pkg = require('../package.json')
+var promisePipe = require('../helpers/promisePipe')
 var purchase = require('./helpers/purchase')
 var sslOptions = {
   keyFile: __dirname + '/../ssl/stretchfs_test.key',
@@ -167,7 +167,7 @@ app.post('/content/retrieve',validateSession,function(req,res){
   P.try(function(){
     return promisePipe(request(retrieveRequest),sniff)
       .then(
-      function(val){return val},
+      function(val){console.log(val); return val},
       function(err){throw new UserError(err.message)}
     )
   })

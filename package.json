@@ -2,7 +2,7 @@
   "author": "NULLIVEX LLC <developers@nullivex.com>",
   "name": "stretchfs-sdk",
   "description": "StretchFS development tools for applications",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "license": "GPL-3.0",
   "homepage": "https://www.nullivex.com/stretchfs-sdk",
   "repository": {
@@ -26,10 +26,9 @@
     "graceful-fs": "^4.1.11",
     "mime": "^2.3.1",
     "object-manage": "^1.0.0",
-    "promisepipe": "2.1.1",
     "random-js": "^1.0.8",
     "request": "^2.87.0",
-    "sha1-stream": "^0.2.1",
+    "sha1-stream": "^1.0.0",
     "temp": "^0.8.3"
   },
   "bin": {

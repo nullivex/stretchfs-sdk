@@ -75,6 +75,11 @@ describe('my test',function(){
 
 ## Changelog
 
+### 4.0.3
+* Implement custom `promisePipe` helper
+* Update dependencies
+* Upgrade testing
+
 ### 4.0.2
 * Add file and folder management calls
 * More reliably report errors
