@@ -39,6 +39,9 @@ endif()
 
 ###=> Define executable and includes/libraries
 add_executable(sfs_fuse
+        state.c state.h
+        memory.c memory.h
+        curl.c curl.h
         main.c
         )
 target_include_directories(sfs_fuse PUBLIC
