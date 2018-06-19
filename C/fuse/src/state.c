@@ -2,21 +2,21 @@
 // StateStruct and methods
 //
 
-#include "state.h"
+#include "../include/state.h"
 
 void sync(){ fflush(stdout); fflush(stderr); }
 
 void
 CFG_GetString(void *userp,char *key,char *dest){
-    StateStruct *state = (StateStruct *) userp;
+    auto StateStruct *state = (StateStruct *) userp;
     struct json_object *value;
     json_object_object_get_ex(state->cfg,key,&value);
     sprintf(dest,"%s",json_object_get_string(value));
 }
 
-void
+size_t
 InitState(void *userp){
-    StateStruct *state = (StateStruct *) userp;
+    auto StateStruct *state = (StateStruct *) userp;
     state->curl.handle = NULL;
     state->curl.headers = NULL;
 
@@ -24,7 +24,7 @@ InitState(void *userp){
     if(stat(CONFIGFILE, &st) != 0){
         fprintf(stderr, "cannot stat file '%s': ", CONFIGFILE);
         perror("");
-        exit(-1);
+        return FALSE;
     }
     unsigned int size = (unsigned int)(st.st_size);
 #ifdef DEBUG
@@ -36,7 +36,7 @@ InitState(void *userp){
     errno_t err;
     if((err = fopen_s(&fd,CONFIGFILE,"r")) != 0){
         fprintf(stderr, "cannot open file '%s': %s\n", CONFIGFILE, strerror(err));
-        exit(-1);
+        return FALSE;
     } else {
         char *inbuf = NULL;
         inbuf = (char *) malloc(size+1);
@@ -55,4 +55,5 @@ InitState(void *userp){
     sync();
 #endif
     CFG_GetString(userp,"baseurl",state->baseurl);
+    return TRUE;
 }

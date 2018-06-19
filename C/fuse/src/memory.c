@@ -2,12 +2,12 @@
 // MemoryStruct memory buffer object
 //
 
-#include "memory.h"
-#include "state.h"
+#include "../include/memory.h"
+#include "../include/state.h"
 
-void
+size_t
 InitMemory(void *userp) {
-    struct MemoryStruct *mem = (struct MemoryStruct *)userp;
+    auto MemoryStruct *mem = (MemoryStruct *)userp;
 #ifdef _MSC_VER
     SYSTEM_INFO siSysInfo;
     GetSystemInfo(&siSysInfo);
@@ -33,4 +33,5 @@ InitMemory(void *userp) {
 #ifdef DEBUG
     printf("Allocated receive buffer (%u bytes)\n",(unsigned int)mem->size);
 #endif
+    return TRUE;
 }

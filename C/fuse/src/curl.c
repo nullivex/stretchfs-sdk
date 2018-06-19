@@ -2,9 +2,9 @@
 // CURL Functions
 //
 
-#include "memory.h"
-#include "curl.h"
-#include "state.h"
+#include "../include/memory.h"
+#include "../include/curl.h"
+#include "../include/state.h"
 
 static size_t
 WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
@@ -13,7 +13,7 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
     printf("[");
 #endif
     size_t realsize = size * nmemb;
-    struct MemoryStruct *mem = (struct MemoryStruct *)userp;
+    auto MemoryStruct *mem = (MemoryStruct *)userp;
 
     size_t cur_pages = (mem->size / mem->page);
     size_t new_pages= ((mem->ptr + realsize + 1) / mem->page) + 1;
@@ -45,9 +45,9 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
     return realsize;
 }
 
-void
+size_t
 InitCURL(void *userp){
-    StateStruct *state = (StateStruct *) userp;
+    auto StateStruct *state = (StateStruct *) userp;
     /* In windows, this will init the winsock stuff */
     curl_global_init(CURL_GLOBAL_ALL);
 
@@ -67,24 +67,26 @@ InitCURL(void *userp){
         curl_easy_setopt(state->curl.handle, CURLOPT_WRITEDATA, (void *) &(state->curl.recvd));
         /* send all data to this callback */
         curl_easy_setopt(state->curl.handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
-    }
+        return TRUE;
+    } else return FALSE;
 }
-static size_t
+
+CURLcode
 PerformCURL(void *userp){
-    StateStruct *state = (StateStruct *) userp;
+    auto StateStruct *state = (StateStruct *) userp;
 
     state->curl.result = curl_easy_perform(state->curl.handle);
     /* Check for errors */
-    if(state->curl.result != CURLE_OK){
+    if(CURLE_OK != state->curl.result){
         fprintf(stderr,"curl_easy_perform() failed: %s\n",
                 curl_easy_strerror(state->curl.result));
-        return -1;
-    } else return 0;
+    }
+    return state->curl.result;
 }
 
-size_t
+CURLcode
 PostCURL(void *userp,PostOpts post){
-    StateStruct *state = (StateStruct *) userp;
+    auto StateStruct *state = (StateStruct *) userp;
     char url[512];
     sprintf(url,"%s/user/login",state->baseurl);
     curl_easy_setopt(state->curl.handle, CURLOPT_URL, url);
@@ -96,12 +98,12 @@ PostCURL(void *userp,PostOpts post){
     printf("hitting POST %s with payload:\n%s\n",url,json_object_to_json_string_ext(post.json,JSON_C_TO_STRING_PRETTY));
     sync();
 #endif
-    size_t rv = PerformCURL(userp);
-    if(0 == rv){
+    CURLcode rv = PerformCURL(userp);
+    if(CURLE_OK == rv){
         state->curl.recvd.parsed = json_tokener_parse(state->curl.recvd.memory);
 #ifdef DEBUG
         printf("\nResult:\n%s\n", state->curl.recvd.memory);
-        printf("parsed result:\n%s\n", json_object_to_json_string_ext(state->curl.recvd.parsed, JSON_C_TO_STRING_PRETTY));
+        printf("parsed result:\n%s\n", json_object_to_json_string_ext(state->curl.recvd.parsed,JSON_C_TO_STRING_PRETTY));
         sync();
 #endif
     }

@@ -2,7 +2,6 @@
 #define SFS_FUSE_STATE_H
 #define CONFIGFILE "config.json"
 
-#include <stdint.h>
 #include <sys/stat.h>
 #include "curl.h"
 
@@ -40,12 +39,12 @@ typedef struct {
 typedef struct {
     struct json_object *cfg;
     char baseurl[255];
-    struct CURLStruct curl;
+    CURLStruct curl;
     SessionStruct session;
 } StateStruct;
 
 void sync();
-void InitState(void *);
 void CFG_GetString(void *,char *,char *);
+size_t InitState(void *);
 
 #endif //SFS_FUSE_STATE_H
