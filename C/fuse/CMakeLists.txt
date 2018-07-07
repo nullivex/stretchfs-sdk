@@ -43,6 +43,7 @@ add_executable(sfs_fuse
         src/state.c include/state.h
         src/memory.c include/memory.h
         src/curl.c include/curl.h
+        src/sfs_api.c include/sfs_api.h
         main.c
         )
 target_include_directories(sfs_fuse PUBLIC
