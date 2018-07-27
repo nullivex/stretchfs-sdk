@@ -270,7 +270,7 @@ exports.prism = function(options){
  * @return {request}
  */
 exports.store = function(options){
-  if(!options) options = config.prism
+  if(!options) options = config.store
   return setupRequest('store',options)
 }
 

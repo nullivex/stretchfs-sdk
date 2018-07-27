@@ -76,6 +76,9 @@ describe('my test',function(){
 ## Changelog
 
 ### 4.0.3
+* Fix bug with blind default selection for `api.store`
+
+### 4.0.3
 * Implement custom `promisePipe` helper
 * Update dependencies
 * Upgrade testing
