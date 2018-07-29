@@ -2,12 +2,12 @@
 // MemoryStruct memory buffer object
 //
 
-#include "../include/memory.h"
-#include "../include/state.h"
+#include "../include/memory.hpp"
+#include "../include/state.hpp"
 
 size_t
 InitMemory(void *userp) {
-    auto MemoryStruct *mem = (MemoryStruct *)userp;
+    auto *mem = (MemoryStruct *)userp;
 #ifdef _MSC_VER
     SYSTEM_INFO siSysInfo;
     GetSystemInfo(&siSysInfo);
@@ -26,7 +26,7 @@ InitMemory(void *userp) {
 #else
     mem->page = PAGESIZE;
 #endif
-    mem->memory = malloc(mem->page); /* will be grown as needed by the realloc in WriteMemoryCallback */
+    mem->memory = (char*)malloc(mem->page); /* will be grown as needed by the realloc in WriteMemoryCallback */
     mem->size = mem->page;           /* size is total alloc bytes */
     mem->ptr = 0;                    /* no data at this point */
     mem->memory[mem->ptr] = 0;       /* ensure null at first byte (cstr thus no need to memset entire page) */

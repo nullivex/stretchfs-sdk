@@ -2,9 +2,9 @@
 // CURL Functions
 //
 
-#include "../include/memory.h"
-#include "../include/curl.h"
-#include "../include/state.h"
+#include "../include/memory.hpp"
+#include "../include/curl.hpp"
+#include "../include/state.hpp"
 
 static size_t
 WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
@@ -13,15 +13,15 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
     printf("[");
 #endif
     size_t realsize = size * nmemb;
-    auto MemoryStruct *mem = (MemoryStruct *)userp;
+    auto *mem = (MemoryStruct *)userp;
 
     size_t cur_pages = (mem->size / mem->page);
     size_t new_pages= ((mem->ptr + realsize + 1) / mem->page) + 1;
     if(cur_pages != new_pages){
-        mem->memory = realloc(mem->memory, mem->page * new_pages);
-        if(mem->memory == NULL) {
+        mem->memory = (char*)realloc(mem->memory, mem->page * new_pages);
+        if(nullptr == mem->memory) {
             /* out of memory! */
-            printf("not enough memory (realloc returned NULL for %u->%u)\n",
+            printf("not enough memory (realloc returned nullptr for %u->%u)\n",
                    (unsigned int)(mem->page * cur_pages),
                    (unsigned int)(mem->page * new_pages)
             );
@@ -47,7 +47,7 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 
 size_t
 InitCURL(void *userp){
-    auto StateStruct *state = (StateStruct *) userp;
+    auto *state = (StateStruct *) userp;
     /* In windows, this will init the winsock stuff */
     curl_global_init(CURL_GLOBAL_ALL);
 
@@ -73,7 +73,7 @@ InitCURL(void *userp){
 
 CURLcode
 PerformCURL(void *userp){
-    auto StateStruct *state = (StateStruct *) userp;
+    auto *state = (StateStruct *) userp;
 
     state->curl.result = curl_easy_perform(state->curl.handle);
     /* Check for errors */
@@ -86,9 +86,9 @@ PerformCURL(void *userp){
 
 CURLcode
 PostCURL(void *userp,PostOpts post){
-    auto StateStruct *state = (StateStruct *) userp;
+    auto *state = (StateStruct *) userp;
     char url[512];
-    sprintf(url,"%s/user/login",state->baseurl);
+    sprintf(url,"%s%s",state->baseurl,post.uri);
     curl_easy_setopt(state->curl.handle, CURLOPT_URL, url);
     curl_easy_setopt(state->curl.handle, CURLOPT_REFERER, url); //"http://localhost:8160/");
     /* POST data */

@@ -2,13 +2,13 @@
 // StateStruct and methods
 //
 
-#include "../include/state.h"
+#include "../include/state.hpp"
 
 void sync(){ fflush(stdout); fflush(stderr); }
 
 void
-CFG_GetString(void *userp,char *key,char *dest){
-    auto StateStruct *state = (StateStruct *) userp;
+CFG_GetString(void *userp, const char *key, char *dest){
+    auto *state = (StateStruct *) userp;
     struct json_object *value;
     json_object_object_get_ex(state->cfg,key,&value);
     sprintf(dest,"%s",json_object_get_string(value));
@@ -16,11 +16,11 @@ CFG_GetString(void *userp,char *key,char *dest){
 
 size_t
 InitState(void *userp){
-    auto StateStruct *state = (StateStruct *) userp;
-    state->curl.handle = NULL;
-    state->curl.headers = NULL;
+    auto *state = (StateStruct *) userp;
+    state->curl.handle = nullptr;
+    state->curl.headers = nullptr;
 
-    struct stat st;
+    struct stat st{};
     if(stat(CONFIGFILE, &st) != 0){
         fprintf(stderr, "cannot stat file '%s': ", CONFIGFILE);
         perror("");
@@ -38,7 +38,7 @@ InitState(void *userp){
         fprintf(stderr, "cannot open file '%s': %s\n", CONFIGFILE, strerror(err));
         return FALSE;
     } else {
-        char *inbuf = NULL;
+        char *inbuf = nullptr;
         inbuf = (char *) malloc(size+1);
         if(0>fread(inbuf,size,1,fd)){
             fprintf(stderr, "cannot read file '%s': ", CONFIGFILE);

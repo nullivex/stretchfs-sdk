@@ -6,7 +6,7 @@
 /* json-c (https://github.com/json-c/json-c) */
 #include <json-c/json.h>
 
-#include "memory.h"
+#include "memory.hpp"
 
 typedef struct {
     CURL *handle;

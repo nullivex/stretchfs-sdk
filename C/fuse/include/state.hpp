@@ -3,7 +3,7 @@
 #define CONFIGFILE "config.json"
 
 #include <sys/stat.h>
-#include "curl.h"
+#include "curl.hpp"
 
 #ifdef _MSC_VER
 #include <windows.h>
@@ -44,7 +44,7 @@ typedef struct {
 } StateStruct;
 
 void sync();
-void CFG_GetString(void *,char *,char *);
+void CFG_GetString(void *, const char *, char *);
 size_t InitState(void *);
 
 #endif //SFS_FUSE_STATE_H

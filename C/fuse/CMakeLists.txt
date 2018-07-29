@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.10)
-project(sfs_fuse C)
+project(sfs_fuse)
 
-set(CMAKE_C_STANDARD 99)
-# not using C++ / do this to avoid dumb warning about its non-use
-set(CMAKE_CXX_COMPILER "")
+# enforce C++11
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD 11)
+#set(CMAKE_C_STANDARD 99)
 
 ###=> Setup paths
 set(DEPS "${CMAKE_SOURCE_DIR}/deps")
@@ -40,11 +42,11 @@ endif()
 
 ###=> Define executable and includes/libraries
 add_executable(sfs_fuse
-        src/state.c include/state.h
-        src/memory.c include/memory.h
-        src/curl.c include/curl.h
-        src/sfs_api.c include/sfs_api.h
-        main.c
+        src/state.cpp include/state.hpp
+        src/memory.cpp include/memory.hpp
+        src/curl.cpp include/curl.hpp
+        src/sfs_api.cpp include/sfs_api.hpp
+        main.cpp
         )
 target_include_directories(sfs_fuse PUBLIC
         "${DEPS}/include"

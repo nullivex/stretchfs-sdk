@@ -1,7 +1,7 @@
 #ifndef SFS_FUSE_MEMSTRUCT_H
 #define SFS_FUSE_MEMSTRUCT_H
 
-#include <stdarg.h>
+#include <cstdarg>
 
 #define PAGESIZE 4096
 typedef struct {

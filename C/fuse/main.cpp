@@ -1,7 +1,7 @@
-#include "include/memory.h"
-#include "include/state.h"
-#include "include/curl.h"
-#include "include/sfs_api.h"
+#include "include/memory.hpp"
+#include "include/state.hpp"
+#include "include/curl.hpp"
+#include "include/sfs_api.hpp"
 
 int main(int argc, char *argv[]){
     StateStruct S;

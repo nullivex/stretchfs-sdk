@@ -2,15 +2,16 @@
 // Created by tbutler on 7/7/2018.
 //
 
-#include "../include/sfs_api.h"
-#include "../include/memory.h"
-#include "../include/state.h"
-#include "../include/curl.h"
+#include "../include/sfs_api.hpp"
+#include "../include/memory.hpp"
+#include "../include/state.hpp"
+#include "../include/curl.hpp"
 
 size_t
 SFS_Login(void *userp,char username[],char password[]){
-    auto StateStruct *state = (StateStruct *) userp;
+    auto *state = (StateStruct *) userp;
     PostOpts post;
+    sprintf(state->baseurl,"https://127.0.100.1:8161");
     sprintf(post.uri,"/user/login");
     post.json = json_object_new_object();
     json_object_object_add(post.json, "tokenType", json_object_new_string("permanent"));
