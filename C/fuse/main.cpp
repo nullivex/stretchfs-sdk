@@ -1,3 +1,4 @@
+#include <string>
 #include "include/memory.hpp"
 #include "include/state.hpp"
 #include "include/curl.hpp"
@@ -16,8 +17,10 @@ int main(int argc, char *argv[]){
         CFG_GetString((void *)&S,"password",password);
         if(0 == SFS_Login((void *)&S,username,password)){
             printf("SFS Login succeeded, userId [%u] token [%s]\n",
-                   (unsigned int)(S.session.UserId), S.session.token
+                   (unsigned int)(S.session.UserId), S.session.token.c_str()
             );
+            sync();
+            SFS_List((void *)&S,",,","");
             sync();
         }
     }

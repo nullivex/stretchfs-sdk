@@ -4,6 +4,7 @@
 #include <cstdarg>
 
 #define PAGESIZE 4096
+
 typedef struct {
     char *memory;
     size_t page;
@@ -12,6 +13,7 @@ typedef struct {
     struct json_object *parsed;
 } MemoryStruct;
 
-size_t InitMemory(void *);
+bool InitMemory(void *);
+bool ResetMemory(void *);
 
 #endif //SFS_FUSE_MEMSTRUCT_H

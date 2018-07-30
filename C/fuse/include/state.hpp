@@ -2,6 +2,7 @@
 #define SFS_FUSE_STATE_H
 #define CONFIGFILE "config.json"
 
+#include <string>
 #include <sys/stat.h>
 #include "curl.hpp"
 
@@ -34,17 +35,18 @@
 
 typedef struct {
     int64_t UserId;
-    char token[255];
+    std::string token;
 } SessionStruct;
+
 typedef struct {
     struct json_object *cfg;
-    char baseurl[255];
+    std::string baseurl;
     CURLStruct curl;
     SessionStruct session;
 } StateStruct;
 
 void sync();
 void CFG_GetString(void *, const char *, char *);
-size_t InitState(void *);
+bool InitState(void *);
 
 #endif //SFS_FUSE_STATE_H

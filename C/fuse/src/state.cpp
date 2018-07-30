@@ -2,6 +2,7 @@
 // StateStruct and methods
 //
 
+#include <string>
 #include "../include/state.hpp"
 
 void sync(){ fflush(stdout); fflush(stderr); }
@@ -14,7 +15,7 @@ CFG_GetString(void *userp, const char *key, char *dest){
     sprintf(dest,"%s",json_object_get_string(value));
 }
 
-size_t
+bool
 InitState(void *userp){
     auto *state = (StateStruct *) userp;
     state->curl.handle = nullptr;
@@ -54,6 +55,8 @@ InitState(void *userp){
     printf("got cfg:\n%s\n",json_object_to_json_string_ext(state->cfg,JSON_C_TO_STRING_PRETTY));
     sync();
 #endif
-    CFG_GetString(userp,"baseurl",state->baseurl);
+    char baseurl[255];
+    CFG_GetString(userp,"baseurl",baseurl);
+    state->baseurl = baseurl;
     return TRUE;
 }
