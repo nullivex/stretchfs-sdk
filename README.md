@@ -78,6 +78,7 @@ describe('my test',function(){
 ### 4.0.5
 * Remove NODE_TLS_REJECT_UNAUTHORIZED being set to 0
 * Remove left over logging
+* Update to latest dependencies
 
 ### 4.0.4
 * Fix bug with blind default selection for `api.store`
