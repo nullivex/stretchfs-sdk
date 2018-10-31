@@ -167,7 +167,7 @@ app.post('/content/retrieve',validateSession,function(req,res){
   P.try(function(){
     return promisePipe(request(retrieveRequest),sniff)
       .then(
-      function(val){console.log(val); return val},
+      function(val){return val},
       function(err){throw new UserError(err.message)}
     )
   })

@@ -100,8 +100,7 @@ exports.checkPublic = function(prism){
         return client.postAsync(client.url('/user/login'))
       })
       .spread(client.validateResponse())
-      .spread(function(res,body){
-        console.log(body)
+      .spread(function(){
         throw new Error('Should have thrown an error for no username')
       })
       .catch(Error,function(err){

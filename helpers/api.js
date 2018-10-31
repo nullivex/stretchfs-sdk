@@ -11,13 +11,6 @@ var NetworkError = require('../helpers/NetworkError')
 //equiv to timeout max in node.js/lib/timers.js
 request = request.defaults({timeout: 2147483647})
 
-
-/**
- * Allow self signed certs
- * @type {number}
- */
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
-
 var tcpErrors = [
   'EINTR',
   'EBADF',
