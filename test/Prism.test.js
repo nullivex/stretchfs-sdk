@@ -98,6 +98,12 @@ describe('Prism',function(){
         expect(result.token).to.equal(mock.purchase.token)
       })
   })
+  it('should show purchase detail',function(){
+    return prism.contentPurchaseDetail(mock.purchase.token)
+      .then(function(result){
+        expect(result.token).to.equal(mock.purchase.token)
+      })
+  })
   it('should remove a purchase',function(){
     return prism.contentPurchaseRemove(mock.purchase.token)
       .then(function(result){

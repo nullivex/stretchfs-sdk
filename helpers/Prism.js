@@ -280,6 +280,32 @@ Prism.prototype.contentPurchase = function(hash,ext,referrer,life,ip){
 
 
 /**
+ * Purchase Detail
+ * @param {string} token
+ * @return {P}
+ */
+Prism.prototype.contentPurchaseDetail = function(token){
+  var that = this
+  var client = {}
+  return that.prepare()
+    .then(function(result){
+      client = result
+      return client.postAsync({
+        url: client.url('/content/purchase/detail'),
+        json: {
+          token: token
+        }
+      })
+    })
+    .spread(that.api.validateResponse())
+    .spread(function(res,body){
+      return body
+    })
+    .catch(that.handleNetworkError)
+}
+
+
+/**
  * Remove purchase
  * @param {string} token
  * @return {P}

@@ -75,6 +75,10 @@ describe('my test',function(){
 
 ## Changelog
 
+### 4.1.0
+* Add `contentPurchaseDetail` method for use in cache resolution.
+* Update to latest dependencies.
+
 ### 4.0.5
 * Remove NODE_TLS_REJECT_UNAUTHORIZED being set to 0
 * Remove left over logging

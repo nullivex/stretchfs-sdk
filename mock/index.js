@@ -201,6 +201,13 @@ app.post('/content/purchase',validateSession,function(req,res){
   detail.ext = ext
   res.json(detail)
 })
+app.post('/content/purchase/detail',validateSession,function(req,res){
+  var token = req.body.token
+  if(!token){
+    res.json({error: 'No token passed for purchase detail'})
+  }
+  res.json(purchase)
+})
 app.post('/content/purchase/remove',validateSession,function(req,res){
   var token = req.body.token
   res.json({token: token, count: 1, success: 'Purchase removed'})
