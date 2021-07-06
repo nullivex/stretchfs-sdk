@@ -2,14 +2,13 @@
   "author": "NULLIVEX LLC <developers@nullivex.com>",
   "name": "stretchfs-sdk",
   "description": "StretchFS development tools for applications",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "license": "GPL-3.0",
   "homepage": "https://www.nullivex.com/stretchfs-sdk",
   "repository": {
     "type": "git",
     "url": "https://github.com/nullivex/stretchfs-sdk.git"
   },
-  "main": "app.js",
   "keywords": [
     "stretchfs"
   ],
@@ -20,16 +19,16 @@
     "bluebird": "^3.7.2",
     "body-parser": "^1.19.0",
     "busboy": "^0.3.1",
-    "commander": "^4.0.1",
-    "debug": "^4.1.1",
+    "commander": "^8.0.0",
+    "debug": "^4.3.2",
     "express": "^4.17.1",
-    "graceful-fs": "^4.2.3",
-    "mime": "^2.4.4",
-    "object-manage": "^1.1.0",
+    "graceful-fs": "^4.2.6",
+    "mime": "^2.5.2",
+    "object-manage": "^1.1.1",
     "random-js": "^2.1.0",
     "request": "^2.88.0",
-    "sha1-stream": "^1.0.1",
-    "temp": "^0.9.1"
+    "sha1-stream": "^1.0.2",
+    "temp": "^0.9.4"
   },
   "bin": {
     "stretchfs-keygen": "./bin/stretchfs-keygen"
@@ -39,7 +38,7 @@
     "test": "node ./node_modules/mocha/bin/mocha ./test/*.test.js"
   },
   "devDependencies": {
-    "chai": "4.2.x",
-    "mocha": "6.2.x"
+    "chai": "4.3.x",
+    "mocha": "9.0.x"
   }
 }

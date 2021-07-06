@@ -75,6 +75,10 @@ describe('my test',function(){
 
 ## Changelog
 
+### 4.1.1
+* Update dependencies
+* Update package json
+
 ### 4.1.0
 * Add `contentPurchaseDetail` method for use in cache resolution.
 * Update to latest dependencies.
