@@ -14,19 +14,20 @@ program
   .option('-P, --port <n>','Prism port, defaults to 8161')
   .parse(process.argv)
 
+const opts = program.opts()
 
 //setup our prism handle
 var prism = new Prism({
   prism: {
-    host: program.host || null,
-    port: program.port || 8161
+    host: opts.host || null,
+    port: opts.port || 8161
   }
 })
 
 //connect
 prism.connect()
   .then(function(){
-    return prism.login(program.username,program.password)
+    return prism.login(opts.username,opts.password)
   })
   .then(function(result){
     console.log('Login successful please use the token below')

@@ -75,6 +75,13 @@ describe('my test',function(){
 
 ## Changelog
 
+### 4.1.2
+* Update dependencies
+* Update package json
+* Fix code for standard-lint
+* Fix code for newer `busboy`
+* Fix code for newer `commander`
+
 ### 4.1.1
 * Update dependencies
 * Update package json
