@@ -1,24 +1,24 @@
 'use strict';
-var P = require('bluebird')
-var bodyParser = require('body-parser')
-var Busboy = require('busboy')
-var express = require('express')
-var fs = require('graceful-fs')
-var https = require('https')
-var mime = require('mime')
-var request = require('request')
-var sha1stream = require('sha1-stream')
-var temp = require('temp')
+const P = require('bluebird')
+const bodyParser = require('body-parser')
+const busboy = require('busboy')
+const express = require('express')
+const fs = require('graceful-fs')
+const https = require('https')
+const mime = require('mime')
+const request = require('request')
+const sha1stream = require('sha1-stream')
+const temp = require('temp')
 
-var app = express()
-var content = require('./helpers/content')
-var contentExists = require('./helpers/contentExists')
-var job = require('./helpers/job')
-var NetworkError = require('../helpers/NetworkError')
-var pkg = require('../package.json')
-var promisePipe = require('../helpers/promisePipe')
-var purchase = require('./helpers/purchase')
-var sslOptions = {
+const app = express()
+const content = require('./helpers/content')
+const contentExists = require('./helpers/contentExists')
+const job = require('./helpers/job')
+const NetworkError = require('../helpers/NetworkError')
+const pkg = require('../package.json')
+const promisePipe = require('../helpers/promisePipe')
+const purchase = require('./helpers/purchase')
+const sslOptions = {
   keyFile: __dirname + '/../ssl/stretchfs_test.key',
   certFile: __dirname + '/../ssl/stretchfs_test.crt',
   pemFile: __dirname + '/../ssl/stretchfs_test.pem',
@@ -26,15 +26,15 @@ var sslOptions = {
   cert: fs.readFileSync(__dirname + '/../ssl/stretchfs_test.crt'),
   pem: fs.readFileSync(__dirname + '/../ssl/stretchfs_test.pem')
 }
-var server = https.createServer(
+const server = https.createServer(
   {
     cert: sslOptions.pem,
     key: sslOptions.pem
   },
   app
 )
-var user = require('./helpers/user')
-var UserError = require('../helpers/UserError')
+const user = require('./helpers/user')
+const UserError = require('../helpers/UserError')
 
 //make some promises
 P.promisifyAll(fs)
@@ -61,8 +61,8 @@ app.post('/ping',function(req,res){
 //--------------------
 //protected routes
 //--------------------
-var validateSession = function(req,res,next){
-  var token = req.get('X-StretchFS-Token')
+const validateSession = function(req,res,next){
+  const token = req.get('X-StretchFS-Token')
   if(!token || user.session.token !== token){
     res.status(401)
     res.json({error: 'Invalid session'})
@@ -98,29 +98,29 @@ app.post('/user/session/validate',validateSession,function(req,res){
 
 //content functions
 app.post('/content/detail',validateSession,function(req,res){
-  var detail = contentExists
+  const detail = contentExists
   detail.hash = req.body.hash || req.body.sha1
   detail.sha1 = req.body.hash || req.body.sha1
   res.json(detail)
 })
 app.post('/content/upload',validateSession,function(req,res){
-  var data = {}
-  var files = {}
-  var filePromises = []
-  var busboy = new Busboy({
+  const data = {}
+  const files = {}
+  const filePromises = []
+  const bb = busboy({
     headers: req.headers,
     highWaterMark: 65536, //64K
     limits: {
       fileSize: 2147483648000 //2TB
     }
   })
-  busboy.on('field',function(key,value){
+  bb.on('field',function(key,value){
     data[key] = value
   })
-  busboy.on('file',function(key,file,name,encoding,mimetype){
-    var tmpfile = temp.path({prefix: 'stretchfs-mock-'})
-    var sniff = sha1stream.createStream()
-    var writeStream = fs.createWriteStream(tmpfile)
+  bb.on('file',function(key,file,name,encoding,mimetype){
+    const tmpfile = temp.path({prefix: 'stretchfs-mock-'})
+    const sniff = sha1stream.createStream()
+    const writeStream = fs.createWriteStream(tmpfile)
     files[key] = {
       key: key,
       tmpfile: tmpfile,
@@ -137,14 +137,14 @@ app.post('/content/upload',validateSession,function(req,res){
         })
     )
   })
-  busboy.on('finish',function(){
+  bb.on('finish',function(){
     P.all(filePromises)
       //destroy all the temp files from uploading
       .then(function(){
-        var keys = Object.keys(files)
-        var promises = []
-        var file
-        for(var i = 0; i < keys.length; i++){
+        const keys = Object.keys(files)
+        const promises = []
+        let file
+        for(let i = 0; i < keys.length; i++){
           file = files[keys[i]]
           promises.push(fs.unlinkAsync(file.tmpfile))
         }
@@ -157,13 +157,13 @@ app.post('/content/upload',validateSession,function(req,res){
         res.json({error: err.message})
       })
   })
-  req.pipe(busboy)
+  req.pipe(bb)
 })
 app.post('/content/retrieve',validateSession,function(req,res){
-  var retrieveRequest = req.body.request
-  var extension = req.body.extension || 'bin'
-  var sniff = sha1stream.createStream()
-  var hash
+  const retrieveRequest = req.body.request
+  const extension = req.body.extension || 'bin'
+  const sniff = sha1stream.createStream()
+  let hash
   P.try(function(){
     return promisePipe(request(retrieveRequest),sniff)
       .then(
@@ -186,14 +186,14 @@ app.post('/content/retrieve',validateSession,function(req,res){
     })
 })
 app.post('/content/purchase',validateSession,function(req,res){
-  var hash = req.body.hash || req.body.sha1
-  var ext = req.body.ext
-  var referrer = req.body.referrer
-  var life = req.body.life
+  const hash = req.body.hash || req.body.sha1
+  const ext = req.body.ext
+  const referrer = req.body.referrer
+  const life = req.body.life
   if(!hash){
     res.json({error: 'No SHA1 passed for purchase'})
   }
-  var detail = purchase
+  const detail = purchase
   detail.life = life || detail.life
   detail.referrer = referrer || detail.referrer
   detail.hash = hash
@@ -202,20 +202,20 @@ app.post('/content/purchase',validateSession,function(req,res){
   res.json(detail)
 })
 app.post('/content/purchase/detail',validateSession,function(req,res){
-  var token = req.body.token
+  const token = req.body.token
   if(!token){
     res.json({error: 'No token passed for purchase detail'})
   }
   res.json(purchase)
 })
 app.post('/content/purchase/remove',validateSession,function(req,res){
-  var token = req.body.token
+  const token = req.body.token
   res.json({token: token, count: 1, success: 'Purchase removed'})
 })
 
 //job functions
 app.post('/job/create',validateSession,function(req,res){
-  var data = req.body
+  const data = req.body
   res.json({
     handle: job.handle,
     description: data.description,
@@ -241,7 +241,7 @@ app.post('/job/detail',validateSession,function(req,res){
   })
 })
 app.post('/job/update',validateSession,function(req,res){
-  var data = req.body
+  const data = req.body
   res.json({
     handle: data.handle || job.handle,
     description: data.description || job.description,
@@ -264,17 +264,17 @@ app.post('/job/remove',validateSession,function(req,res){
   })
 })
 app.post('/job/start',validateSession,function(req,res){
-  var jobStart = job
+  const jobStart = job
   jobStart.status = 'queued'
   res.json(jobStart)
 })
 app.post('/job/retry',validateSession,function(req,res){
-  var jobRetry = job
+  const jobRetry = job
   jobRetry.status = 'queued_retry'
   res.json(jobRetry)
 })
 app.post('/job/abort',validateSession,function(req,res){
-  var jobAbort = job
+  const jobAbort = job
   jobAbort.status = 'queued_abort'
   res.json(jobAbort)
 })
