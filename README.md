@@ -1,4 +1,4 @@
-stretchfs-sdk [![Build Status](https://travis-ci.org/nullivex/stretchfs-sdk.svg?branch=master)](https://travis-ci.org/nullivex/stretchfs-sdk)
+stretchfs-sdk
 ========
 
 StretchFS Software Development Kit
