@@ -58,8 +58,11 @@ var pool = {maxSockets: config.maxSockets}
  * @return {function}
  */
 var makeURL = function(options){
+  if (options.ssl === undefined) options.ssl = true
   return function(uri){
-    return 'https://' + (options.host || '127.0.0.1') + ':' + options.port + uri
+    return (options.ssl ? 'https' : 'http' ) +
+      '://' + (options.host || '127.0.0.1') +
+      ':' + options.port + uri
   }
 }
 

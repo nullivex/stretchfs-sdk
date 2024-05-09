@@ -3,11 +3,73 @@ stretchfs-sdk [![Build Status](https://travis-ci.org/nullivex/stretchfs-sdk.svg?
 
 StretchFS Software Development Kit
 
-## API Usage
+## Installation
 
 ```
-$ npm install stretchfs-sdk --save
+$ npm install stretchfs-sdk
 ```
+
+## Prism
+
+The prism is the API end point of StretchFS. The Prism helper provides a
+complete interface for working with a StretchFS cluster.
+
+```js
+const Prism = require('stretchfs-sdk').Prism
+
+const sfs = new Prism({
+  username: 'user',
+  password: 'pass',
+  domain: 'cdn.stretchfs.com',
+  prism: {
+   host: null,
+   port: 8161
+  }
+})
+sfs.setSession('session-token')
+
+async function main () {
+  const detail = await sfs.contentDetail('a03f181dc7dedcfb577511149b8844711efdb04f')
+  console.log(detail)
+}
+
+main().then(() => { process.exit() })
+```
+
+## Turn off SSL
+
+By default, the Prism is communicated through via SSL. The prism exposes a port
+for plain text traffic. There is also the StretchFS proxy that can communicate
+in plain text.
+
+This is useful when communicating with StretchFS in a local environment.
+
+```js
+const Prism = require('stretchfs-sdk').Prism
+
+const sfs = new Prism({
+  username: 'user',
+  password: 'pass',
+  domain: '192.168.1.2:8080',
+  prism: {
+   host: '192.168.1.2',
+   port: 8080,
+   ssl: false
+  }
+})
+sfs.setSession('session-token')
+
+async function main () {
+  const detail = await sfs.contentDetail('a03f181dc7dedcfb577511149b8844711efdb04f')
+  console.log(detail)
+}
+
+main().then(() => { process.exit() })
+```
+
+## Direct API Usage
+
+When using the provided Prism class is not enough.
 
 ```js
 'use strict';
@@ -43,6 +105,11 @@ prism.postAsync({
   })
 ```
 
+## HTTP Usage
+
+Turn off SSL
+
+
 ## Mock Usage
 
 ```js
@@ -74,6 +141,10 @@ describe('my test',function(){
 ```
 
 ## Changelog
+
+### 4.1.2
+* Add optional SSL support. Enables communication with an HTTP only proxy. Which
+is useful for local environments and development.
 
 ### 4.1.1
 * Update dependencies

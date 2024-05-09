@@ -26,7 +26,8 @@ var Prism = function(opts){
     domain: 'cdn.stretchfs.com',
     prism: {
       host: null,
-      port: 8161
+      port: 8161,
+      ssl: true
     }
   })
   this.opts.$load(opts)
